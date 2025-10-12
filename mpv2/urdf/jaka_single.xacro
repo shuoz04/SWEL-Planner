@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding='utf-8'?>
+<robot name="jaka_single" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <material name="white">
+        <color rgba="0.6 1 1 1"/>
+    </material>
+
+    <xacro:include filename="$(find jaka_zu7_v2)/urdf/jaka_zu7_v2.xacro" ns="right"/>
+    <xacro:right.jaka_robot prefix="right_"/>
+
+    <link name="right_gripper_base_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://jaka_zu7_v2/meshes/gripper-raw.STL"/>
+            </geometry>
+            <material name="gripper_color"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://jaka_zu7_v2/meshes/gripper-raw.STL"/>
+            </geometry>
+        </collision>
+    </link>
+    <link name="base_footprint" />
+    <joint name="base_to_right_base" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="right_base_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    <joint name="right_ee_joint" type="fixed">
+        <parent link="right_link_6"/>
+        <child link="right_gripper_base_link"/>
+        <origin xyz="0 0 0.039" rpy="0 0 0"/>
+    </joint>
+
+    <material name="gripper_color">
+        <color rgba="0.2 0.6 0.8 1.0"/>
+    </material>
+
+
+
+
+
+
+    <material name="platform_color">
+        <color rgba="1 0.6 0 0.9" />
+    </material>
+
+
+    
+    
+    
+    
+    
+    
+   
+
+    <link name="base_link">
+        <inertial>
+            <origin xyz="0.22454481094265 -0.000121566929192296 -0.0217833554379588" rpy="0 0 0" />
+            <mass value="489.75374794146" />
+            <inertia ixx="48.2354733953586" ixy="0.00216700359294732" ixz="-18.848641161208" iyy="133.353844982803" iyz="0.0107083577623272" izz="133.160331961371" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/base_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/base_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+   
+
+    <link name="Link_back_wheel">
+        <inertial>
+            <origin xyz="1.75304215588312E-13 0.400000000000128 -3.77475828372553E-15" rpy="0 0 0" />
+            <mass value="0.954782367303498" />
+            <inertia ixx="0.126867866131336" ixy="3.47504954688255E-18" ixz="4.25283125583302E-34" iyy="0.00251425513426531" iyz="-1.42599198997849E-17" izz="0.126867866131336" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_back_wheel.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_back_wheel.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_back_wheel" type="fixed">
+        <origin xyz="-0.399622619946745 -0.400062679451287 -0.265" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="Link_back_wheel" />
+        <axis xyz="0 -1 0" />
+    </joint>
+    <link name="Link_front_wheel">
+        <inertial>
+            <origin xyz="1.75415237890775E-13 0.400000000000127 -2.66453525910038E-15" rpy="0 0 0" />
+            <mass value="0.9547823673035" />
+            <inertia ixx="0.126867866131336" ixy="3.47504954688255E-18" ixz="1.01613621978594E-33" iyy="0.00251425513426531" iyz="-1.42599198997849E-17" izz="0.126867866131336" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_front_wheel.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_front_wheel.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_front_wheel" type="fixed">
+        <origin xyz="0.610317856240423 -0.400062679451287 -0.265" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="Link_front_wheel" />
+        <axis xyz="0 -1 0" />
+    </joint>
+    <link name="Link_right_power_wheel">
+        <inertial>
+            <origin xyz="1.75470749042006E-13 0.0200000000001277 -3.10862446895044E-15" rpy="0 0 0" />
+            <mass value="20.826238867894117" />
+            <inertia ixx="0.0022146984660716" ixy="4.96308367531804E-22" ixz="1.85288457211878E-19" iyy="0.00420906656737144" iyz="-2.13414168747446E-35" izz="0.0022146984660716" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_right_power_wheel.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_right_power_wheel.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_right_power_wheel" type="fixed">
+        <origin xyz="0.035317856240421 -0.390062679451287 -0.255" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="Link_right_power_wheel" />
+        <axis xyz="0 -1 0" />
+    </joint>
+    <link name="Link_left_power_wheel">
+        <inertial>
+            <origin xyz="1.75415237890775E-13 -0.0199999999998726 -3.21964677141295E-15" rpy="0 0 0" />
+            <mass value="20.826238867894116" />
+            <inertia ixx="0.0022146984660716" ixy="-6.43476537876295E-36" ixz="2.5146290621612E-19" iyy="0.00420906656737143" iyz="1.32348898008484E-21" izz="0.0022146984660716" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_left_power_wheel.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_left_power_wheel.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_left_power_wheel" type="fixed">
+        <origin xyz="0.035317856240421 0.394937320548713 -0.255" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="Link_left_power_wheel" />
+        <axis xyz="0 -1 0" />
+    </joint>
+    <link name="Link_table">
+        <inertial>
+            <origin xyz="0.414469991836663 0.300555954452694 -0.315827430043209" rpy="0 0 0" />
+            <mass value="70.077971664089" />
+            <inertia ixx="8.91424723818767" ixy="-0.192272717184322" ixz="-0.253494143869551" iyy="15.6114015246641" iyz="0.116131211813613" izz="19.9160734402502" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_table.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://car_model/meshes/Link_table.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_table" type="fixed">
+        <origin xyz="-0.53465 -0.31006 0.69675" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="Link_table" />
+        <axis xyz="0 0 1" />
+        <limit lower="0" upper="0.3" effort="7000" velocity="1" />
+    </joint>
+    
+    
+    <link name="camera_link">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <visual>
+                <origin xyz="0 0 0" rpy="-0.35 0 1.5708"/>
+                <geometry>
+                    <mesh filename="package://marm_description/meshes/kinect.dae" />
+                </geometry>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="0.07 0.3 0.09"/>
+                </geometry>
+            </collision>
+    </link>
+    
+    <joint name="camera_optical_joint" type="fixed">
+            <origin xyz="0.19 0.10 -0.185" rpy="0 0 1.5707963267948966"/>
+            <parent link="Link_table"/>
+            <child link="camera_link"/>
+    </joint>
+
+    
+     <gazebo reference="camera_link">
+            <sensor type="depth" name="camera">
+                <always_on>true</always_on>
+                <update_rate>20.0</update_rate>
+                <camera>
+                    <horizontal_fov>1.047</horizontal_fov>
+                    <image>
+                        <format>R8G8B8</format>
+                        <width>640</width>
+                        <height>480</height>
+                    </image>
+                    <clip>
+                        <near>0.05</near>
+                        <far>8.0</far>
+                    </clip>
+                </camera>
+                <plugin name="kinect_camera_controller" filename="libgazebo_ros_openni_kinect.so">
+                    <cameraName>camera</cameraName>
+                    <alwaysOn>true</alwaysOn>
+                    <updateRate>10</updateRate>
+                    <imageTopicName>rgb/image_raw</imageTopicName>
+                    <depthImageTopicName>depth/image_raw</depthImageTopicName>
+                    <pointCloudTopicName>depth/points</pointCloudTopicName>
+                    <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+                    <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+                    <frameName>camera_frame_optical</frameName>
+                    <baseline>0.1</baseline>
+                    <distortion_k1>0.0</distortion_k1>
+                    <distortion_k2>0.0</distortion_k2>
+                    <distortion_k3>0.0</distortion_k3>
+                    <distortion_t1>0.0</distortion_t1>
+                    <distortion_t2>0.0</distortion_t2>
+                    <pointCloudCutoff>0.4</pointCloudCutoff>
+                </plugin>
+            </sensor>
+        </gazebo>
+
+    
+    
+    
+    
+    <!--trans -->
+   
+    <!-- color -->
+    <gazebo reference="base_link">
+        <material>Gazebo/Blue</material>
+        <plugin name="gazebo_ros_control">
+            <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
+    <gazebo reference="Link_table">
+        <material>Gazebo/Yellow</material>
+    </gazebo>
+    <gazebo reference="Link_left_power_wheel">
+        <material>Gazebo/Black</material>
+        <mu1>1</mu1>
+        <mu2>1</mu2>
+    </gazebo>
+    <gazebo reference="Link_right_power_wheel">
+        <material>Gazebo/Black</material>
+        <mu1>1</mu1>
+        <mu2>1</mu2>
+    </gazebo>
+    <gazebo reference="Link_front_wheel">
+        <material>Gazebo/Gray</material>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+    </gazebo>
+    <gazebo reference="Link_back_wheel">
+        <material>Gazebo/Gray</material>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+    </gazebo>
+    <!-- controller -->
+    <gazebo>
+        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <rosDebugLevel>Debug</rosDebugLevel>
+            <publishWheelTF>false</publishWheelTF>
+            <robotNamespace>/</robotNamespace>
+            <publishTf>1</publishTf>
+            <publishWheelJointState>false</publishWheelJointState>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>100.0</updateRate>
+            <legacyMode>true</legacyMode>
+            <leftJoint>joint_left_power_wheel</leftJoint>
+            <rightJoint>joint_right_power_wheel</rightJoint>
+            <wheelSeparation>0.745</wheelSeparation>
+            <wheelDiameter>0.2</wheelDiameter>
+            <broadcastTF>1</broadcastTF>
+            <wheelTorque>30</wheelTorque>
+            <wheelAcceleration>1.8</wheelAcceleration>
+            <commandTopic>cmd_vel</commandTopic>
+            <odometryFrame>odom</odometryFrame>
+            <odometryTopic>odom</odometryTopic>
+            <robotBaseFrame>base_footprint</robotBaseFrame>
+        </plugin>
+    </gazebo>
+    
+    
+    
+    
+    
+    <joint name="base_to_print" type="fixed">
+        <parent link="base_footprint" />
+        <child link="base_link" />
+        <origin xyz="-0.16994 -0.32465 -0.46075" rpy="0 0 -1.5707963267948966" />
+    </joint>
+    
+    
+    
+    
+
+    <transmission name="trans_right_joint_1">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_joint_1">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_joint_1_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_right_joint_2">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_joint_2">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_joint_2_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_right_joint_3">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_joint_3">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_joint_3_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_right_joint_4">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_joint_4">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_joint_4_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_right_joint_5">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_joint_5">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_joint_5_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_right_joint_6">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_joint_6">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_joint_6_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_joint_back_wheel">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="joint_back_wheel">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="joint_back_wheel_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_joint_front_wheel">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="joint_front_wheel">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="joint_front_wheel_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_joint_table">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="joint_table">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="joint_table_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+        <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
+</robot>

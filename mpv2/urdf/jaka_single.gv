@@ -1,0 +1,50 @@
+digraph G {
+node [shape=box];
+"base_footprint" [label="base_footprint"];
+"base_link" [label="base_link"];
+"Link_back_wheel" [label="Link_back_wheel"];
+"Link_front_wheel" [label="Link_front_wheel"];
+"Link_left_power_wheel" [label="Link_left_power_wheel"];
+"Link_right_power_wheel" [label="Link_right_power_wheel"];
+"Link_table" [label="Link_table"];
+"camera_link" [label="camera_link"];
+"right_base_link" [label="right_base_link"];
+"right_link_1" [label="right_link_1"];
+"right_link_2" [label="right_link_2"];
+"right_link_3" [label="right_link_3"];
+"right_link_4" [label="right_link_4"];
+"right_link_5" [label="right_link_5"];
+"right_link_6" [label="right_link_6"];
+"right_gripper_base_link" [label="right_gripper_base_link"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base_footprint" -> "base_to_print" [label="xyz: -0.16994 -0.62465 -0.46075 \nrpy: 0 0 -1.5708"]
+"base_to_print" -> "base_link"
+"base_link" -> "joint_back_wheel" [label="xyz: -0.399623 -0.400063 -0.265 \nrpy: 0 -0 0"]
+"joint_back_wheel" -> "Link_back_wheel"
+"base_link" -> "joint_front_wheel" [label="xyz: 0.610318 -0.400063 -0.265 \nrpy: 0 -0 0"]
+"joint_front_wheel" -> "Link_front_wheel"
+"base_link" -> "joint_left_power_wheel" [label="xyz: 0.0353179 0.394937 -0.255 \nrpy: 0 -0 0"]
+"joint_left_power_wheel" -> "Link_left_power_wheel"
+"base_link" -> "joint_right_power_wheel" [label="xyz: 0.0353179 -0.390063 -0.255 \nrpy: 0 -0 0"]
+"joint_right_power_wheel" -> "Link_right_power_wheel"
+"base_link" -> "joint_table" [label="xyz: -0.53465 -0.31006 0.69675 \nrpy: 0 -0 0"]
+"joint_table" -> "Link_table"
+"Link_table" -> "camera_optical_joint" [label="xyz: 0.19 0.1 -0.185 \nrpy: 0 -0 1.5708"]
+"camera_optical_joint" -> "camera_link"
+"base_footprint" -> "base_to_right_base" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_to_right_base" -> "right_base_link"
+"right_base_link" -> "right_joint_1" [label="xyz: 0 0 0.04 \nrpy: 1.5708 -5.55112e-17 1.5708"]
+"right_joint_1" -> "right_link_1"
+"right_link_1" -> "right_joint_2" [label="xyz: 0.064 0.08015 0 \nrpy: 0 -1.5708 -1.5708"]
+"right_joint_2" -> "right_link_2"
+"right_link_2" -> "right_joint_3" [label="xyz: 0.36 0 0 \nrpy: 3.14159 -0 0"]
+"right_joint_3" -> "right_link_3"
+"right_link_3" -> "right_joint_4" [label="xyz: 0.3035 -0.0055125 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"right_joint_4" -> "right_link_4"
+"right_link_4" -> "right_joint_5" [label="xyz: 0.0455 -0.068 0 \nrpy: 3.14159 -0 1.5708"]
+"right_joint_5" -> "right_link_5"
+"right_link_5" -> "right_joint_6" [label="xyz: -0.0455 -0.068 0 \nrpy: 0 1.5708 -1.5708"]
+"right_joint_6" -> "right_link_6"
+"right_link_6" -> "right_ee_joint" [label="xyz: 0 0 0.039 \nrpy: 0 -0 0"]
+"right_ee_joint" -> "right_gripper_base_link"
+}

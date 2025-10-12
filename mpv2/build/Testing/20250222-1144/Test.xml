@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="(empty)"
+	BuildStamp="20250222-1144-Experimental"
+	Name="zs-vm"
+	Generator="ctest-3.16.3"
+	CompilerName="/usr/bin/c++"
+	CompilerVersion="9.4.0"
+	OSName="Linux"
+	Hostname="zs-vm"
+	OSRelease="5.15.0-131-generic"
+	OSVersion="#141~20.04.1-Ubuntu SMP Thu Jan 16 18:38:51 UTC 2025"
+	OSPlatform="x86_64"
+	Is64Bits="1"
+	VendorString="AuthenticAMD"
+	VendorID="Advanced Micro Devices"
+	FamilyID="26"
+	ModelID="68"
+	ProcessorCacheSize="1024"
+	NumberOfLogicalCPU="4"
+	NumberOfPhysicalCPU="4"
+	TotalVirtualMemory="923"
+	TotalPhysicalMemory="15953"
+	LogicalProcessorsPerPhysical="1"
+	ProcessorClockFrequency="3792.87"
+	>
+	<Testing>
+		<StartDateTime>Feb 22 19:44 CST</StartDateTime>
+		<StartTestTime>1740224688</StartTestTime>
+		<TestList/>
+		<EndDateTime>Feb 22 19:44 CST</EndDateTime>
+		<EndTestTime>1740224688</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>

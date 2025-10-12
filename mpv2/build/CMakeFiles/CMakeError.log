@@ -1,0 +1,2878 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/桌面/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_22e80/fast && /usr/bin/make -f CMakeFiles/cmTC_22e80.dir/build.make CMakeFiles/cmTC_22e80.dir/build
+make[1]: 进入目录“/home/zs/桌面/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_22e80.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_22e80.dir/src.c.o   -c /home/zs/桌面/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_22e80
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_22e80.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_22e80.dir/src.c.o  -o cmTC_22e80 
+/usr/bin/ld: CMakeFiles/cmTC_22e80.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_22e80.dir/build.make:87：cmTC_22e80] 错误 1
+make[1]: 离开目录“/home/zs/桌面/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_22e80/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/桌面/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_31117/fast && /usr/bin/make -f CMakeFiles/cmTC_31117.dir/build.make CMakeFiles/cmTC_31117.dir/build
+make[1]: 进入目录“/home/zs/桌面/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_31117.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_31117.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_31117
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_31117.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_31117.dir/CheckFunctionExists.c.o  -o cmTC_31117  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_31117.dir/build.make:87：cmTC_31117] 错误 1
+make[1]: 离开目录“/home/zs/桌面/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_31117/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_8370e/fast && /usr/bin/make -f CMakeFiles/cmTC_8370e.dir/build.make CMakeFiles/cmTC_8370e.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_8370e.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_8370e.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_8370e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8370e.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_8370e.dir/src.c.o  -o cmTC_8370e 
+/usr/bin/ld: CMakeFiles/cmTC_8370e.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_8370e.dir/build.make:87：cmTC_8370e] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_8370e/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_49974/fast && /usr/bin/make -f CMakeFiles/cmTC_49974.dir/build.make CMakeFiles/cmTC_49974.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_49974.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_49974.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_49974
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_49974.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_49974.dir/CheckFunctionExists.c.o  -o cmTC_49974  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_49974.dir/build.make:87：cmTC_49974] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_49974/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_34271/fast && /usr/bin/make -f CMakeFiles/cmTC_34271.dir/build.make CMakeFiles/cmTC_34271.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_34271.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_34271.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_34271
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_34271.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_34271.dir/src.c.o  -o cmTC_34271 
+/usr/bin/ld: CMakeFiles/cmTC_34271.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_34271.dir/build.make:87：cmTC_34271] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_34271/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9eae1/fast && /usr/bin/make -f CMakeFiles/cmTC_9eae1.dir/build.make CMakeFiles/cmTC_9eae1.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_9eae1.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_9eae1.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_9eae1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9eae1.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_9eae1.dir/CheckFunctionExists.c.o  -o cmTC_9eae1  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_9eae1.dir/build.make:87：cmTC_9eae1] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_9eae1/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_dc3d6/fast && /usr/bin/make -f CMakeFiles/cmTC_dc3d6.dir/build.make CMakeFiles/cmTC_dc3d6.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_dc3d6.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_dc3d6.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_dc3d6
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dc3d6.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_dc3d6.dir/src.c.o  -o cmTC_dc3d6 
+/usr/bin/ld: CMakeFiles/cmTC_dc3d6.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_dc3d6.dir/build.make:87：cmTC_dc3d6] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_dc3d6/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_636d7/fast && /usr/bin/make -f CMakeFiles/cmTC_636d7.dir/build.make CMakeFiles/cmTC_636d7.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_636d7.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_636d7.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_636d7
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_636d7.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_636d7.dir/CheckFunctionExists.c.o  -o cmTC_636d7  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_636d7.dir/build.make:87：cmTC_636d7] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_636d7/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_a31f0/fast && /usr/bin/make -f CMakeFiles/cmTC_a31f0.dir/build.make CMakeFiles/cmTC_a31f0.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_a31f0.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_a31f0.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_a31f0
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a31f0.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_a31f0.dir/src.c.o  -o cmTC_a31f0 
+/usr/bin/ld: CMakeFiles/cmTC_a31f0.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_a31f0.dir/build.make:87：cmTC_a31f0] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_a31f0/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f9b19/fast && /usr/bin/make -f CMakeFiles/cmTC_f9b19.dir/build.make CMakeFiles/cmTC_f9b19.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_f9b19.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_f9b19.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_f9b19
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f9b19.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_f9b19.dir/CheckFunctionExists.c.o  -o cmTC_f9b19  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_f9b19.dir/build.make:87：cmTC_f9b19] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_f9b19/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d8a5a/fast && /usr/bin/make -f CMakeFiles/cmTC_d8a5a.dir/build.make CMakeFiles/cmTC_d8a5a.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_d8a5a.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_d8a5a.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_d8a5a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d8a5a.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_d8a5a.dir/src.c.o  -o cmTC_d8a5a 
+/usr/bin/ld: CMakeFiles/cmTC_d8a5a.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_d8a5a.dir/build.make:87：cmTC_d8a5a] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_d8a5a/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e3a98/fast && /usr/bin/make -f CMakeFiles/cmTC_e3a98.dir/build.make CMakeFiles/cmTC_e3a98.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_e3a98.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_e3a98.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_e3a98
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e3a98.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_e3a98.dir/CheckFunctionExists.c.o  -o cmTC_e3a98  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_e3a98.dir/build.make:87：cmTC_e3a98] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_e3a98/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_02719/fast && /usr/bin/make -f CMakeFiles/cmTC_02719.dir/build.make CMakeFiles/cmTC_02719.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_02719.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_02719.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_02719
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_02719.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_02719.dir/src.c.o  -o cmTC_02719 
+/usr/bin/ld: CMakeFiles/cmTC_02719.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_02719.dir/build.make:87：cmTC_02719] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_02719/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_5d205/fast && /usr/bin/make -f CMakeFiles/cmTC_5d205.dir/build.make CMakeFiles/cmTC_5d205.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_5d205.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_5d205.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_5d205
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5d205.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_5d205.dir/CheckFunctionExists.c.o  -o cmTC_5d205  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_5d205.dir/build.make:87：cmTC_5d205] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_5d205/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_6f326/fast && /usr/bin/make -f CMakeFiles/cmTC_6f326.dir/build.make CMakeFiles/cmTC_6f326.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6f326.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_6f326.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_6f326
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6f326.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_6f326.dir/src.c.o  -o cmTC_6f326 
+/usr/bin/ld: CMakeFiles/cmTC_6f326.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_6f326.dir/build.make:87：cmTC_6f326] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_6f326/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_729a3/fast && /usr/bin/make -f CMakeFiles/cmTC_729a3.dir/build.make CMakeFiles/cmTC_729a3.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_729a3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_729a3.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_729a3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_729a3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_729a3.dir/CheckFunctionExists.c.o  -o cmTC_729a3  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_729a3.dir/build.make:87：cmTC_729a3] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_729a3/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d7f1b/fast && /usr/bin/make -f CMakeFiles/cmTC_d7f1b.dir/build.make CMakeFiles/cmTC_d7f1b.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_d7f1b.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_d7f1b.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_d7f1b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d7f1b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_d7f1b.dir/src.c.o  -o cmTC_d7f1b 
+/usr/bin/ld: CMakeFiles/cmTC_d7f1b.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_d7f1b.dir/build.make:87：cmTC_d7f1b] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_d7f1b/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_903b3/fast && /usr/bin/make -f CMakeFiles/cmTC_903b3.dir/build.make CMakeFiles/cmTC_903b3.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_903b3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_903b3.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_903b3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_903b3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_903b3.dir/CheckFunctionExists.c.o  -o cmTC_903b3  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_903b3.dir/build.make:87：cmTC_903b3] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_903b3/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_11d3b/fast && /usr/bin/make -f CMakeFiles/cmTC_11d3b.dir/build.make CMakeFiles/cmTC_11d3b.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_11d3b.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_11d3b.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_11d3b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_11d3b.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_11d3b.dir/src.c.o  -o cmTC_11d3b 
+/usr/bin/ld: CMakeFiles/cmTC_11d3b.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_11d3b.dir/build.make:87：cmTC_11d3b] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_11d3b/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_33e83/fast && /usr/bin/make -f CMakeFiles/cmTC_33e83.dir/build.make CMakeFiles/cmTC_33e83.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_33e83.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_33e83.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_33e83
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33e83.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_33e83.dir/CheckFunctionExists.c.o  -o cmTC_33e83  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_33e83.dir/build.make:87：cmTC_33e83] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_33e83/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_28fa8/fast && /usr/bin/make -f CMakeFiles/cmTC_28fa8.dir/build.make CMakeFiles/cmTC_28fa8.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_28fa8.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_28fa8.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_28fa8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_28fa8.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_28fa8.dir/src.c.o  -o cmTC_28fa8 
+/usr/bin/ld: CMakeFiles/cmTC_28fa8.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_28fa8.dir/build.make:87：cmTC_28fa8] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_28fa8/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_2922f/fast && /usr/bin/make -f CMakeFiles/cmTC_2922f.dir/build.make CMakeFiles/cmTC_2922f.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_2922f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_2922f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_2922f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2922f.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_2922f.dir/CheckFunctionExists.c.o  -o cmTC_2922f  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_2922f.dir/build.make:87：cmTC_2922f] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_2922f/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_73c72/fast && /usr/bin/make -f CMakeFiles/cmTC_73c72.dir/build.make CMakeFiles/cmTC_73c72.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_73c72.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_73c72.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_73c72
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_73c72.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_73c72.dir/src.c.o  -o cmTC_73c72 
+/usr/bin/ld: CMakeFiles/cmTC_73c72.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_73c72.dir/build.make:87：cmTC_73c72] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_73c72/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_bb3a0/fast && /usr/bin/make -f CMakeFiles/cmTC_bb3a0.dir/build.make CMakeFiles/cmTC_bb3a0.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_bb3a0.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_bb3a0.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_bb3a0
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bb3a0.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_bb3a0.dir/CheckFunctionExists.c.o  -o cmTC_bb3a0  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_bb3a0.dir/build.make:87：cmTC_bb3a0] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_bb3a0/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d3b48/fast && /usr/bin/make -f CMakeFiles/cmTC_d3b48.dir/build.make CMakeFiles/cmTC_d3b48.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_d3b48.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_d3b48.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_d3b48
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d3b48.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_d3b48.dir/src.c.o  -o cmTC_d3b48 
+/usr/bin/ld: CMakeFiles/cmTC_d3b48.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_d3b48.dir/build.make:87：cmTC_d3b48] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_d3b48/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_aa844/fast && /usr/bin/make -f CMakeFiles/cmTC_aa844.dir/build.make CMakeFiles/cmTC_aa844.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_aa844.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_aa844.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_aa844
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_aa844.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_aa844.dir/CheckFunctionExists.c.o  -o cmTC_aa844  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_aa844.dir/build.make:87：cmTC_aa844] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_aa844/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_03a41/fast && /usr/bin/make -f CMakeFiles/cmTC_03a41.dir/build.make CMakeFiles/cmTC_03a41.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_03a41.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_03a41.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_03a41
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_03a41.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_03a41.dir/src.c.o  -o cmTC_03a41 
+/usr/bin/ld: CMakeFiles/cmTC_03a41.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_03a41.dir/build.make:87：cmTC_03a41] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_03a41/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_44ac1/fast && /usr/bin/make -f CMakeFiles/cmTC_44ac1.dir/build.make CMakeFiles/cmTC_44ac1.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_44ac1.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_44ac1.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_44ac1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_44ac1.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_44ac1.dir/CheckFunctionExists.c.o  -o cmTC_44ac1  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_44ac1.dir/build.make:87：cmTC_44ac1] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_44ac1/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b34f9/fast && /usr/bin/make -f CMakeFiles/cmTC_b34f9.dir/build.make CMakeFiles/cmTC_b34f9.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_b34f9.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_b34f9.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_b34f9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b34f9.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_b34f9.dir/src.c.o  -o cmTC_b34f9 
+/usr/bin/ld: CMakeFiles/cmTC_b34f9.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_b34f9.dir/build.make:87：cmTC_b34f9] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_b34f9/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d7b1b/fast && /usr/bin/make -f CMakeFiles/cmTC_d7b1b.dir/build.make CMakeFiles/cmTC_d7b1b.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_d7b1b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_d7b1b.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_d7b1b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d7b1b.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_d7b1b.dir/CheckFunctionExists.c.o  -o cmTC_d7b1b  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_d7b1b.dir/build.make:87：cmTC_d7b1b] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_d7b1b/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e4a0e/fast && /usr/bin/make -f CMakeFiles/cmTC_e4a0e.dir/build.make CMakeFiles/cmTC_e4a0e.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_e4a0e.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_e4a0e.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_e4a0e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e4a0e.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_e4a0e.dir/src.c.o  -o cmTC_e4a0e 
+/usr/bin/ld: CMakeFiles/cmTC_e4a0e.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_e4a0e.dir/build.make:87：cmTC_e4a0e] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_e4a0e/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_2f640/fast && /usr/bin/make -f CMakeFiles/cmTC_2f640.dir/build.make CMakeFiles/cmTC_2f640.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_2f640.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_2f640.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_2f640
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2f640.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_2f640.dir/CheckFunctionExists.c.o  -o cmTC_2f640  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_2f640.dir/build.make:87：cmTC_2f640] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_2f640/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d7122/fast && /usr/bin/make -f CMakeFiles/cmTC_d7122.dir/build.make CMakeFiles/cmTC_d7122.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_d7122.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_d7122.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_d7122
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d7122.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_d7122.dir/src.c.o  -o cmTC_d7122 
+/usr/bin/ld: CMakeFiles/cmTC_d7122.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_d7122.dir/build.make:87：cmTC_d7122] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_d7122/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e1820/fast && /usr/bin/make -f CMakeFiles/cmTC_e1820.dir/build.make CMakeFiles/cmTC_e1820.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_e1820.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_e1820.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_e1820
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e1820.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_e1820.dir/CheckFunctionExists.c.o  -o cmTC_e1820  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_e1820.dir/build.make:87：cmTC_e1820] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_e1820/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_1e917/fast && /usr/bin/make -f CMakeFiles/cmTC_1e917.dir/build.make CMakeFiles/cmTC_1e917.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_1e917.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_1e917.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_1e917
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1e917.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_1e917.dir/src.c.o  -o cmTC_1e917 
+/usr/bin/ld: CMakeFiles/cmTC_1e917.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_1e917.dir/build.make:87：cmTC_1e917] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_1e917/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_763ce/fast && /usr/bin/make -f CMakeFiles/cmTC_763ce.dir/build.make CMakeFiles/cmTC_763ce.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_763ce.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_763ce.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_763ce
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_763ce.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_763ce.dir/CheckFunctionExists.c.o  -o cmTC_763ce  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_763ce.dir/build.make:87：cmTC_763ce] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_763ce/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_be939/fast && /usr/bin/make -f CMakeFiles/cmTC_be939.dir/build.make CMakeFiles/cmTC_be939.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_be939.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_be939.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_be939
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be939.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_be939.dir/src.c.o  -o cmTC_be939 
+/usr/bin/ld: CMakeFiles/cmTC_be939.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_be939.dir/build.make:87：cmTC_be939] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_be939/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_8674d/fast && /usr/bin/make -f CMakeFiles/cmTC_8674d.dir/build.make CMakeFiles/cmTC_8674d.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_8674d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_8674d.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_8674d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8674d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_8674d.dir/CheckFunctionExists.c.o  -o cmTC_8674d  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_8674d.dir/build.make:87：cmTC_8674d] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_8674d/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_5bc00/fast && /usr/bin/make -f CMakeFiles/cmTC_5bc00.dir/build.make CMakeFiles/cmTC_5bc00.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_5bc00.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_5bc00.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_5bc00
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5bc00.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_5bc00.dir/src.c.o  -o cmTC_5bc00 
+/usr/bin/ld: CMakeFiles/cmTC_5bc00.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_5bc00.dir/build.make:87：cmTC_5bc00] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_5bc00/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_5c8ce/fast && /usr/bin/make -f CMakeFiles/cmTC_5c8ce.dir/build.make CMakeFiles/cmTC_5c8ce.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_5c8ce.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_5c8ce.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_5c8ce
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5c8ce.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_5c8ce.dir/CheckFunctionExists.c.o  -o cmTC_5c8ce  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_5c8ce.dir/build.make:87：cmTC_5c8ce] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_5c8ce/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_78a7b/fast && /usr/bin/make -f CMakeFiles/cmTC_78a7b.dir/build.make CMakeFiles/cmTC_78a7b.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_78a7b.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_78a7b.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_78a7b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_78a7b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_78a7b.dir/src.c.o  -o cmTC_78a7b 
+/usr/bin/ld: CMakeFiles/cmTC_78a7b.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_78a7b.dir/build.make:87：cmTC_78a7b] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_78a7b/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b082f/fast && /usr/bin/make -f CMakeFiles/cmTC_b082f.dir/build.make CMakeFiles/cmTC_b082f.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_b082f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_b082f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_b082f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b082f.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_b082f.dir/CheckFunctionExists.c.o  -o cmTC_b082f  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_b082f.dir/build.make:87：cmTC_b082f] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_b082f/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f2b96/fast && /usr/bin/make -f CMakeFiles/cmTC_f2b96.dir/build.make CMakeFiles/cmTC_f2b96.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_f2b96.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_f2b96.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_f2b96
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f2b96.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_f2b96.dir/src.c.o  -o cmTC_f2b96 
+/usr/bin/ld: CMakeFiles/cmTC_f2b96.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_f2b96.dir/build.make:87：cmTC_f2b96] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_f2b96/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_74533/fast && /usr/bin/make -f CMakeFiles/cmTC_74533.dir/build.make CMakeFiles/cmTC_74533.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_74533.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_74533.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_74533
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_74533.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_74533.dir/CheckFunctionExists.c.o  -o cmTC_74533  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_74533.dir/build.make:87：cmTC_74533] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_74533/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_32fd4/fast && /usr/bin/make -f CMakeFiles/cmTC_32fd4.dir/build.make CMakeFiles/cmTC_32fd4.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_32fd4.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_32fd4.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_32fd4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_32fd4.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_32fd4.dir/src.c.o  -o cmTC_32fd4 
+/usr/bin/ld: CMakeFiles/cmTC_32fd4.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_32fd4.dir/build.make:87：cmTC_32fd4] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_32fd4/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9c063/fast && /usr/bin/make -f CMakeFiles/cmTC_9c063.dir/build.make CMakeFiles/cmTC_9c063.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_9c063.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_9c063.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_9c063
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9c063.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_9c063.dir/CheckFunctionExists.c.o  -o cmTC_9c063  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_9c063.dir/build.make:87：cmTC_9c063] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_9c063/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_7a6e4/fast && /usr/bin/make -f CMakeFiles/cmTC_7a6e4.dir/build.make CMakeFiles/cmTC_7a6e4.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_7a6e4.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_7a6e4.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_7a6e4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7a6e4.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_7a6e4.dir/src.c.o  -o cmTC_7a6e4 
+/usr/bin/ld: CMakeFiles/cmTC_7a6e4.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_7a6e4.dir/build.make:87：cmTC_7a6e4] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_7a6e4/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_43f3f/fast && /usr/bin/make -f CMakeFiles/cmTC_43f3f.dir/build.make CMakeFiles/cmTC_43f3f.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_43f3f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_43f3f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_43f3f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_43f3f.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_43f3f.dir/CheckFunctionExists.c.o  -o cmTC_43f3f  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_43f3f.dir/build.make:87：cmTC_43f3f] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_43f3f/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9b9b5/fast && /usr/bin/make -f CMakeFiles/cmTC_9b9b5.dir/build.make CMakeFiles/cmTC_9b9b5.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_9b9b5.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_9b9b5.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_9b9b5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9b9b5.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_9b9b5.dir/src.c.o  -o cmTC_9b9b5 
+/usr/bin/ld: CMakeFiles/cmTC_9b9b5.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_9b9b5.dir/build.make:87：cmTC_9b9b5] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_9b9b5/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_06d4a/fast && /usr/bin/make -f CMakeFiles/cmTC_06d4a.dir/build.make CMakeFiles/cmTC_06d4a.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_06d4a.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_06d4a.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_06d4a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_06d4a.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_06d4a.dir/CheckFunctionExists.c.o  -o cmTC_06d4a  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_06d4a.dir/build.make:87：cmTC_06d4a] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_06d4a/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_6d9d1/fast && /usr/bin/make -f CMakeFiles/cmTC_6d9d1.dir/build.make CMakeFiles/cmTC_6d9d1.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_6d9d1.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_6d9d1.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_6d9d1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6d9d1.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_6d9d1.dir/src.c.o  -o cmTC_6d9d1 
+/usr/bin/ld: CMakeFiles/cmTC_6d9d1.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_6d9d1.dir/build.make:87：cmTC_6d9d1] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_6d9d1/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_ab77b/fast && /usr/bin/make -f CMakeFiles/cmTC_ab77b.dir/build.make CMakeFiles/cmTC_ab77b.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_ab77b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_ab77b.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_ab77b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ab77b.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_ab77b.dir/CheckFunctionExists.c.o  -o cmTC_ab77b  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_ab77b.dir/build.make:87：cmTC_ab77b] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_ab77b/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_804c2/fast && /usr/bin/make -f CMakeFiles/cmTC_804c2.dir/build.make CMakeFiles/cmTC_804c2.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_804c2.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_804c2.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_804c2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_804c2.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_804c2.dir/src.c.o  -o cmTC_804c2 
+/usr/bin/ld: CMakeFiles/cmTC_804c2.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_804c2.dir/build.make:87：cmTC_804c2] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_804c2/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_a229a/fast && /usr/bin/make -f CMakeFiles/cmTC_a229a.dir/build.make CMakeFiles/cmTC_a229a.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_a229a.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_a229a.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_a229a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a229a.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_a229a.dir/CheckFunctionExists.c.o  -o cmTC_a229a  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_a229a.dir/build.make:87：cmTC_a229a] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_a229a/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_df420/fast && /usr/bin/make -f CMakeFiles/cmTC_df420.dir/build.make CMakeFiles/cmTC_df420.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_df420.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_df420.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_df420
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_df420.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_df420.dir/src.c.o  -o cmTC_df420 
+/usr/bin/ld: CMakeFiles/cmTC_df420.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_df420.dir/build.make:87：cmTC_df420] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_df420/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_8811f/fast && /usr/bin/make -f CMakeFiles/cmTC_8811f.dir/build.make CMakeFiles/cmTC_8811f.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_8811f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_8811f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_8811f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8811f.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_8811f.dir/CheckFunctionExists.c.o  -o cmTC_8811f  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_8811f.dir/build.make:87：cmTC_8811f] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_8811f/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9e5c2/fast && /usr/bin/make -f CMakeFiles/cmTC_9e5c2.dir/build.make CMakeFiles/cmTC_9e5c2.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_9e5c2.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_9e5c2.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_9e5c2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9e5c2.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_9e5c2.dir/src.c.o  -o cmTC_9e5c2 
+/usr/bin/ld: CMakeFiles/cmTC_9e5c2.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_9e5c2.dir/build.make:87：cmTC_9e5c2] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_9e5c2/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e3991/fast && /usr/bin/make -f CMakeFiles/cmTC_e3991.dir/build.make CMakeFiles/cmTC_e3991.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_e3991.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_e3991.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_e3991
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e3991.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_e3991.dir/CheckFunctionExists.c.o  -o cmTC_e3991  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_e3991.dir/build.make:87：cmTC_e3991] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_e3991/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_131c9/fast && /usr/bin/make -f CMakeFiles/cmTC_131c9.dir/build.make CMakeFiles/cmTC_131c9.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_131c9.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_131c9.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_131c9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_131c9.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_131c9.dir/src.c.o  -o cmTC_131c9 
+/usr/bin/ld: CMakeFiles/cmTC_131c9.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_131c9.dir/build.make:87：cmTC_131c9] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_131c9/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_235b6/fast && /usr/bin/make -f CMakeFiles/cmTC_235b6.dir/build.make CMakeFiles/cmTC_235b6.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_235b6.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_235b6.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_235b6
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_235b6.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_235b6.dir/CheckFunctionExists.c.o  -o cmTC_235b6  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_235b6.dir/build.make:87：cmTC_235b6] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_235b6/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3e2eb/fast && /usr/bin/make -f CMakeFiles/cmTC_3e2eb.dir/build.make CMakeFiles/cmTC_3e2eb.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_3e2eb.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_3e2eb.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_3e2eb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3e2eb.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_3e2eb.dir/src.c.o  -o cmTC_3e2eb 
+/usr/bin/ld: CMakeFiles/cmTC_3e2eb.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_3e2eb.dir/build.make:87：cmTC_3e2eb] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_3e2eb/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_41a7d/fast && /usr/bin/make -f CMakeFiles/cmTC_41a7d.dir/build.make CMakeFiles/cmTC_41a7d.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_41a7d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_41a7d.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_41a7d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_41a7d.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_41a7d.dir/CheckFunctionExists.c.o  -o cmTC_41a7d  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_41a7d.dir/build.make:87：cmTC_41a7d] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_41a7d/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_dc96a/fast && /usr/bin/make -f CMakeFiles/cmTC_dc96a.dir/build.make CMakeFiles/cmTC_dc96a.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_dc96a.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_dc96a.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_dc96a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dc96a.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_dc96a.dir/src.c.o  -o cmTC_dc96a 
+/usr/bin/ld: CMakeFiles/cmTC_dc96a.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_dc96a.dir/build.make:87：cmTC_dc96a] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_dc96a/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_75b08/fast && /usr/bin/make -f CMakeFiles/cmTC_75b08.dir/build.make CMakeFiles/cmTC_75b08.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_75b08.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_75b08.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_75b08
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_75b08.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_75b08.dir/CheckFunctionExists.c.o  -o cmTC_75b08  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_75b08.dir/build.make:87：cmTC_75b08] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_75b08/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_ee4f1/fast && /usr/bin/make -f CMakeFiles/cmTC_ee4f1.dir/build.make CMakeFiles/cmTC_ee4f1.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_ee4f1.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_ee4f1.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_ee4f1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ee4f1.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_ee4f1.dir/src.c.o  -o cmTC_ee4f1 
+/usr/bin/ld: CMakeFiles/cmTC_ee4f1.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_ee4f1.dir/build.make:87：cmTC_ee4f1] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_ee4f1/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_35b6b/fast && /usr/bin/make -f CMakeFiles/cmTC_35b6b.dir/build.make CMakeFiles/cmTC_35b6b.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_35b6b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_35b6b.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_35b6b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_35b6b.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_35b6b.dir/CheckFunctionExists.c.o  -o cmTC_35b6b  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_35b6b.dir/build.make:87：cmTC_35b6b] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_35b6b/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3e9d8/fast && /usr/bin/make -f CMakeFiles/cmTC_3e9d8.dir/build.make CMakeFiles/cmTC_3e9d8.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_3e9d8.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_3e9d8.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_3e9d8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3e9d8.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_3e9d8.dir/src.c.o  -o cmTC_3e9d8 
+/usr/bin/ld: CMakeFiles/cmTC_3e9d8.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_3e9d8.dir/build.make:87：cmTC_3e9d8] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_3e9d8/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_27cc3/fast && /usr/bin/make -f CMakeFiles/cmTC_27cc3.dir/build.make CMakeFiles/cmTC_27cc3.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_27cc3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_27cc3.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_27cc3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_27cc3.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_27cc3.dir/CheckFunctionExists.c.o  -o cmTC_27cc3  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_27cc3.dir/build.make:87：cmTC_27cc3] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_27cc3/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3f9aa/fast && /usr/bin/make -f CMakeFiles/cmTC_3f9aa.dir/build.make CMakeFiles/cmTC_3f9aa.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_3f9aa.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_3f9aa.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_3f9aa
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3f9aa.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_3f9aa.dir/src.c.o  -o cmTC_3f9aa 
+/usr/bin/ld: CMakeFiles/cmTC_3f9aa.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_3f9aa.dir/build.make:87：cmTC_3f9aa] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_3f9aa/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_a6e45/fast && /usr/bin/make -f CMakeFiles/cmTC_a6e45.dir/build.make CMakeFiles/cmTC_a6e45.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_a6e45.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_a6e45.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_a6e45
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a6e45.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_a6e45.dir/CheckFunctionExists.c.o  -o cmTC_a6e45  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_a6e45.dir/build.make:87：cmTC_a6e45] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_a6e45/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_7d6b8/fast && /usr/bin/make -f CMakeFiles/cmTC_7d6b8.dir/build.make CMakeFiles/cmTC_7d6b8.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_7d6b8.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_7d6b8.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_7d6b8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7d6b8.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_7d6b8.dir/src.c.o  -o cmTC_7d6b8 
+/usr/bin/ld: CMakeFiles/cmTC_7d6b8.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_7d6b8.dir/build.make:87：cmTC_7d6b8] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_7d6b8/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3835d/fast && /usr/bin/make -f CMakeFiles/cmTC_3835d.dir/build.make CMakeFiles/cmTC_3835d.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_3835d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_3835d.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_3835d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3835d.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_3835d.dir/CheckFunctionExists.c.o  -o cmTC_3835d  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_3835d.dir/build.make:87：cmTC_3835d] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_3835d/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f6d61/fast && /usr/bin/make -f CMakeFiles/cmTC_f6d61.dir/build.make CMakeFiles/cmTC_f6d61.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_f6d61.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_f6d61.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_f6d61
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f6d61.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_f6d61.dir/src.c.o  -o cmTC_f6d61 
+/usr/bin/ld: CMakeFiles/cmTC_f6d61.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_f6d61.dir/build.make:87：cmTC_f6d61] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_f6d61/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_caf50/fast && /usr/bin/make -f CMakeFiles/cmTC_caf50.dir/build.make CMakeFiles/cmTC_caf50.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_caf50.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_caf50.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_caf50
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_caf50.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_caf50.dir/CheckFunctionExists.c.o  -o cmTC_caf50  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_caf50.dir/build.make:87：cmTC_caf50] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_caf50/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_682df/fast && /usr/bin/make -f CMakeFiles/cmTC_682df.dir/build.make CMakeFiles/cmTC_682df.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_682df.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_682df.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_682df
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_682df.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_682df.dir/src.c.o  -o cmTC_682df 
+/usr/bin/ld: CMakeFiles/cmTC_682df.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_682df.dir/build.make:87：cmTC_682df] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_682df/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_1512c/fast && /usr/bin/make -f CMakeFiles/cmTC_1512c.dir/build.make CMakeFiles/cmTC_1512c.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_1512c.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_1512c.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_1512c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1512c.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_1512c.dir/CheckFunctionExists.c.o  -o cmTC_1512c  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_1512c.dir/build.make:87：cmTC_1512c] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_1512c/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_c4514/fast && /usr/bin/make -f CMakeFiles/cmTC_c4514.dir/build.make CMakeFiles/cmTC_c4514.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_c4514.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_c4514.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_c4514
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c4514.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_c4514.dir/src.c.o  -o cmTC_c4514 
+/usr/bin/ld: CMakeFiles/cmTC_c4514.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_c4514.dir/build.make:87：cmTC_c4514] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_c4514/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_02648/fast && /usr/bin/make -f CMakeFiles/cmTC_02648.dir/build.make CMakeFiles/cmTC_02648.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_02648.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_02648.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_02648
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_02648.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_02648.dir/CheckFunctionExists.c.o  -o cmTC_02648  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_02648.dir/build.make:87：cmTC_02648] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_02648/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_4f1b2/fast && /usr/bin/make -f CMakeFiles/cmTC_4f1b2.dir/build.make CMakeFiles/cmTC_4f1b2.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_4f1b2.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_4f1b2.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_4f1b2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4f1b2.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_4f1b2.dir/src.c.o  -o cmTC_4f1b2 
+/usr/bin/ld: CMakeFiles/cmTC_4f1b2.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_4f1b2.dir/build.make:87：cmTC_4f1b2] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_4f1b2/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_33717/fast && /usr/bin/make -f CMakeFiles/cmTC_33717.dir/build.make CMakeFiles/cmTC_33717.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_33717.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_33717.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_33717
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33717.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_33717.dir/CheckFunctionExists.c.o  -o cmTC_33717  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_33717.dir/build.make:87：cmTC_33717] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_33717/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_6a340/fast && /usr/bin/make -f CMakeFiles/cmTC_6a340.dir/build.make CMakeFiles/cmTC_6a340.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6a340.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_6a340.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_6a340
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6a340.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_6a340.dir/src.c.o  -o cmTC_6a340 
+/usr/bin/ld: CMakeFiles/cmTC_6a340.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_6a340.dir/build.make:87：cmTC_6a340] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_6a340/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_747d3/fast && /usr/bin/make -f CMakeFiles/cmTC_747d3.dir/build.make CMakeFiles/cmTC_747d3.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_747d3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_747d3.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_747d3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_747d3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_747d3.dir/CheckFunctionExists.c.o  -o cmTC_747d3  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_747d3.dir/build.make:87：cmTC_747d3] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_747d3/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f4128/fast && /usr/bin/make -f CMakeFiles/cmTC_f4128.dir/build.make CMakeFiles/cmTC_f4128.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_f4128.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_f4128.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_f4128
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f4128.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_f4128.dir/src.c.o  -o cmTC_f4128 
+/usr/bin/ld: CMakeFiles/cmTC_f4128.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_f4128.dir/build.make:87：cmTC_f4128] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_f4128/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9e6d8/fast && /usr/bin/make -f CMakeFiles/cmTC_9e6d8.dir/build.make CMakeFiles/cmTC_9e6d8.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_9e6d8.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_9e6d8.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_9e6d8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9e6d8.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_9e6d8.dir/CheckFunctionExists.c.o  -o cmTC_9e6d8  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_9e6d8.dir/build.make:87：cmTC_9e6d8] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_9e6d8/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_91844/fast && /usr/bin/make -f CMakeFiles/cmTC_91844.dir/build.make CMakeFiles/cmTC_91844.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_91844.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_91844.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_91844
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_91844.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_91844.dir/src.c.o  -o cmTC_91844 
+/usr/bin/ld: CMakeFiles/cmTC_91844.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_91844.dir/build.make:87：cmTC_91844] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_91844/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_57b63/fast && /usr/bin/make -f CMakeFiles/cmTC_57b63.dir/build.make CMakeFiles/cmTC_57b63.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_57b63.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_57b63.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_57b63
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_57b63.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_57b63.dir/CheckFunctionExists.c.o  -o cmTC_57b63  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_57b63.dir/build.make:87：cmTC_57b63] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_57b63/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_cc437/fast && /usr/bin/make -f CMakeFiles/cmTC_cc437.dir/build.make CMakeFiles/cmTC_cc437.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_cc437.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_cc437.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_cc437
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cc437.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_cc437.dir/src.c.o  -o cmTC_cc437 
+/usr/bin/ld: CMakeFiles/cmTC_cc437.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_cc437.dir/build.make:87：cmTC_cc437] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_cc437/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f694d/fast && /usr/bin/make -f CMakeFiles/cmTC_f694d.dir/build.make CMakeFiles/cmTC_f694d.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_f694d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_f694d.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_f694d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f694d.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_f694d.dir/CheckFunctionExists.c.o  -o cmTC_f694d  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_f694d.dir/build.make:87：cmTC_f694d] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_f694d/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_22248/fast && /usr/bin/make -f CMakeFiles/cmTC_22248.dir/build.make CMakeFiles/cmTC_22248.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_22248.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_22248.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_22248
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_22248.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_22248.dir/src.c.o  -o cmTC_22248 
+/usr/bin/ld: CMakeFiles/cmTC_22248.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_22248.dir/build.make:87：cmTC_22248] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_22248/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_97cec/fast && /usr/bin/make -f CMakeFiles/cmTC_97cec.dir/build.make CMakeFiles/cmTC_97cec.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_97cec.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_97cec.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_97cec
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_97cec.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_97cec.dir/CheckFunctionExists.c.o  -o cmTC_97cec  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_97cec.dir/build.make:87：cmTC_97cec] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_97cec/fast] 错误 2
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_933a4/fast && /usr/bin/make -f CMakeFiles/cmTC_933a4.dir/build.make CMakeFiles/cmTC_933a4.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_933a4.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_933a4.dir/src.c.o   -c /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp/src.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_933a4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_933a4.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_933a4.dir/src.c.o  -o cmTC_933a4 
+/usr/bin/ld: CMakeFiles/cmTC_933a4.dir/src.c.o: in function `main':
+src.c:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_933a4.dir/build.make:87：cmTC_933a4] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_933a4/fast] 错误 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_6dd6b/fast && /usr/bin/make -f CMakeFiles/cmTC_6dd6b.dir/build.make CMakeFiles/cmTC_6dd6b.dir/build
+make[1]: 进入目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Building C object CMakeFiles/cmTC_6dd6b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_6dd6b.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+Linking C executable cmTC_6dd6b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6dd6b.dir/link.txt --verbose=1
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_6dd6b.dir/CheckFunctionExists.c.o  -o cmTC_6dd6b  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_6dd6b.dir/build.make:87：cmTC_6dd6b] 错误 1
+make[1]: 离开目录“/home/zs/0120_catkin_ws/src/mpv2/build/CMakeFiles/CMakeTmp”
+make: *** [Makefile:121：cmTC_6dd6b/fast] 错误 2
+
+
+

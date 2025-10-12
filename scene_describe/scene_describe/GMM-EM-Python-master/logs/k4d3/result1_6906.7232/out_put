@@ -1,0 +1,123 @@
+Iteration: 1, log-likelihood: 6646.3216
+Iteration: 2, log-likelihood: 6646.3216
+Iteration: 3, log-likelihood: 6646.3216
+Iteration: 4, log-likelihood: 6646.3217
+Iteration: 5, log-likelihood: 6647.6190
+Iteration: 6, log-likelihood: 6665.3613
+Iteration: 7, log-likelihood: 6670.2693
+Iteration: 8, log-likelihood: 6670.2699
+Iteration: 9, log-likelihood: 6670.2747
+Iteration: 10, log-likelihood: 6670.3356
+Iteration: 11, log-likelihood: 6671.3550
+Iteration: 12, log-likelihood: 6680.5504
+Iteration: 13, log-likelihood: 6696.3176
+Iteration: 14, log-likelihood: 6713.4989
+Iteration: 15, log-likelihood: 6725.0957
+Iteration: 16, log-likelihood: 6731.5109
+Iteration: 17, log-likelihood: 6736.4045
+Iteration: 18, log-likelihood: 6742.2343
+Iteration: 19, log-likelihood: 6750.7268
+Iteration: 20, log-likelihood: 6759.7927
+Iteration: 21, log-likelihood: 6767.1495
+Iteration: 22, log-likelihood: 6773.0929
+Iteration: 23, log-likelihood: 6778.6251
+Iteration: 24, log-likelihood: 6784.6213
+Iteration: 25, log-likelihood: 6790.9096
+Iteration: 26, log-likelihood: 6797.0360
+Iteration: 27, log-likelihood: 6803.4640
+Iteration: 28, log-likelihood: 6810.9140
+Iteration: 29, log-likelihood: 6819.6136
+Iteration: 30, log-likelihood: 6829.1850
+Iteration: 31, log-likelihood: 6838.7253
+Iteration: 32, log-likelihood: 6847.0146
+Iteration: 33, log-likelihood: 6853.2365
+Iteration: 34, log-likelihood: 6857.8640
+Iteration: 35, log-likelihood: 6861.5190
+Iteration: 36, log-likelihood: 6864.0465
+Iteration: 37, log-likelihood: 6866.8820
+Iteration: 38, log-likelihood: 6867.6023
+Iteration: 39, log-likelihood: 6868.1193
+Iteration: 40, log-likelihood: 6868.5230
+Iteration: 41, log-likelihood: 6868.8537
+Iteration: 42, log-likelihood: 6869.1358
+Iteration: 43, log-likelihood: 6869.3849
+Iteration: 44, log-likelihood: 6869.6117
+Iteration: 45, log-likelihood: 6869.8243
+Iteration: 46, log-likelihood: 6870.0293
+Iteration: 47, log-likelihood: 6870.2327
+Iteration: 48, log-likelihood: 6870.4402
+Iteration: 49, log-likelihood: 6870.6579
+Iteration: 50, log-likelihood: 6870.8918
+Iteration: 51, log-likelihood: 6871.1489
+Iteration: 52, log-likelihood: 6871.4365
+Iteration: 53, log-likelihood: 6871.7625
+Iteration: 54, log-likelihood: 6872.1351
+Iteration: 55, log-likelihood: 6872.5620
+Iteration: 56, log-likelihood: 6873.0496
+Iteration: 57, log-likelihood: 6873.6014
+Iteration: 58, log-likelihood: 6874.2171
+Iteration: 59, log-likelihood: 6874.8914
+Iteration: 60, log-likelihood: 6875.6139
+Iteration: 61, log-likelihood: 6876.3695
+Iteration: 62, log-likelihood: 6877.1404
+Iteration: 63, log-likelihood: 6877.9083
+Iteration: 64, log-likelihood: 6878.6564
+Iteration: 65, log-likelihood: 6879.3720
+Iteration: 66, log-likelihood: 6880.0469
+Iteration: 67, log-likelihood: 6880.6774
+Iteration: 68, log-likelihood: 6881.2636
+Iteration: 69, log-likelihood: 6881.8082
+Iteration: 70, log-likelihood: 6882.3155
+Iteration: 71, log-likelihood: 6882.7908
+Iteration: 72, log-likelihood: 6883.2399
+Iteration: 73, log-likelihood: 6883.6685
+Iteration: 74, log-likelihood: 6884.0826
+Iteration: 75, log-likelihood: 6884.4880
+Iteration: 76, log-likelihood: 6884.8907
+Iteration: 77, log-likelihood: 6885.2971
+Iteration: 78, log-likelihood: 6885.7139
+Iteration: 79, log-likelihood: 6886.1488
+Iteration: 80, log-likelihood: 6886.6104
+Iteration: 81, log-likelihood: 6887.1085
+Iteration: 82, log-likelihood: 6887.6547
+Iteration: 83, log-likelihood: 6888.2622
+Iteration: 84, log-likelihood: 6888.9460
+Iteration: 85, log-likelihood: 6889.7220
+Iteration: 86, log-likelihood: 6890.6054
+Iteration: 87, log-likelihood: 6891.6084
+Iteration: 88, log-likelihood: 6892.7364
+Iteration: 89, log-likelihood: 6893.9834
+Iteration: 90, log-likelihood: 6895.3289
+Iteration: 91, log-likelihood: 6896.7379
+Iteration: 92, log-likelihood: 6898.1654
+Iteration: 93, log-likelihood: 6899.5644
+Iteration: 94, log-likelihood: 6900.8951
+Iteration: 95, log-likelihood: 6902.1299
+Iteration: 96, log-likelihood: 6903.2558
+Iteration: 97, log-likelihood: 6904.2707
+Iteration: 98, log-likelihood: 6905.1804
+Iteration: 99, log-likelihood: 6905.9942
+Iteration: 100, log-likelihood: 6906.7232
+mu:
+[[0.6380591  0.01964312 0.56548415]
+ [0.64864127 0.01139043 0.54314434]
+ [0.57795586 0.13846859 0.57415738]
+ [0.53103906 0.09851758 0.5516694 ]]
+sigma:
+[[[ 1.00000000e-006 -2.91238055e-152 -7.88373585e-152]
+  [-2.91238055e-152  1.00000000e-006  6.14826903e-152]
+  [-7.88373585e-152  6.14826903e-152  1.00000000e-006]]
+
+ [[ 1.00000000e-006 -2.91238055e-152 -7.88373585e-152]
+  [-2.91238055e-152  1.00000000e-006  6.14826903e-152]
+  [-7.88373585e-152  6.14826903e-152  1.00000000e-006]]
+
+ [[ 1.53042481e-003  1.41452681e-004 -1.43390204e-003]
+  [ 1.41452681e-004  3.86130941e-004  5.33517198e-005]
+  [-1.43390204e-003  5.33517198e-005  2.38565230e-003]]
+
+ [[ 5.23037762e-004 -3.58578647e-005 -2.34265231e-004]
+  [-3.58578647e-005  1.51692962e-003  2.38336708e-004]
+  [-2.34265231e-004  2.38336708e-004  1.38923019e-003]]]
+weight:
+[0.00083612 0.00083612 0.42534502 0.57298273]

@@ -1,0 +1,8 @@
+prefix=/home/zs/0120_catkin_ws/src/mpv2/build/devel
+
+Name: mpv2
+Description: Description of mpv2
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
