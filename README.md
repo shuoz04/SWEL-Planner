@@ -5,8 +5,24 @@ ubuntu 20.04
 ROS ros-noetic
 moveit 1.1.16
 
-[Fig1_new.tif](https://github.com/user-attachments/files/24235380/Fig1_new.tif)
-[Fig13.tif](https://github.com/user-attachments/files/24235382/Fig13.tif)
+```text
+.
+├── mpv2/                  # path planning algorithm
+│   ├── scripts            # core codes
+│   └── condig             # config
+├── rm_moveit/             # moveit config
+│   ├── launch             # rviz/gazebo launch
+│   ├── config
+│  
+├── rm_description/        # robot file
+│   └── meshes
+    └── urdf               # URDF file
+├── scene_describe/        # task scene modeling
+│   ├── GMM
+│   ├── scene-modeling
+│   └── oct_Tree          
+└── README.md
+
 
 @inproceedings{huang2024neural,
   title={Neural Informed RRT*: Learning-based Path Planning with Point Cloud State Representations under Admissible Ellipsoidal Constraints},
