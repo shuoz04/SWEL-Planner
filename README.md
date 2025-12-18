@@ -1,11 +1,14 @@
 # SWEL-Planner
-This is the source code of our proposed SWEL planner
+**This is the source code of our proposed SWEL planner**
+## overview
 ![overview](mpv2/output/overview.png)
+## robot in real-world
 ![real_world](mpv2/output/realworld.png)
+## config
 ubuntu 20.04
 ROS ros-noetic
 moveit 1.1.16
-
+## Repository Structure
 ```text
 .
 ├── mpv2/                  # path planning algorithm
