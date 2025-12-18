@@ -1,6 +1,7 @@
 # SWEL-Planner
 This is the source code of our proposed SWEL planner
-
+![overview](mpv2/output/Fig1_new.tif)
+![real_world](mpv2/output/Fig13.tif)
 ubuntu 20.04
 ROS ros-noetic
 moveit 1.1.16
