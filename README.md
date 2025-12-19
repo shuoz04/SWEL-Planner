@@ -28,7 +28,5 @@ moveit 1.1.16
 └── README.md
 ```
 ## Reference
+  NIRRT-star：https://github.com/tedhuang96/nirrt_star
 
-  title={Neural Informed RRT*: Learning-based Path Planning with Point Cloud State Representations under Admissible Ellipsoidal Constraints},
-  author={Huang, Zhe and Chen, Hongyu and Pohovey, John and Driggs-Campbell, Katherine},
-  https://github.com/tedhuang96/nirrt_star
