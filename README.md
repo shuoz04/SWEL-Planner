@@ -12,7 +12,7 @@ moveit 1.1.16
 ```text
 .
 ├── mpv2/                  # path planning algorithm
-│   ├── scripts            # core codes
+│   ├── scripts            # core codes HC, SWEL and NIRRT-star
 │   └── condig             # config
 ├── rm_moveit/             # moveit config
 │   ├── launch             # rviz/gazebo launch
