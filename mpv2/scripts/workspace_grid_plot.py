@@ -1,57 +1,68 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-@author: Zhiyu YANG
-@email: ZhiyuYANG96@outlook.com
-@time: 2022/5/10 下午5:58
-"""
+"""Publish a point cloud file to ROS for workspace debugging."""
+
+from __future__ import annotations
+
 import open3d as o3d
+import numpy as np
 import rospy
 import sensor_msgs.msg
+
 from planner.ColorMapping import convert_numpy_2_pointcloud2_color
-import numpy as np
 
-rospy.init_node("pt2", anonymous=True)
 
-# pc: o3d.geometry.PointCloud = o3d.io.read_point_cloud("/home/msi/1008_catkin_ws/src/pickingv2/scripts/data/0714120307_out.ply")
-pc: o3d.geometry.PointCloud = o3d.io.read_point_cloud("/home/msi/Documents/ppp/ganzhi_celiang/0000_cloud.pcd")
-R = pc.get_rotation_matrix_from_xyz((np.pi, np.pi / 1.5, np.pi / 2))
-pc = pc.rotate(R, center=(0, 0, 0))
+POINT_CLOUD_PATH = "/home/msi/Documents/ppp/ganzhi_celiang/0000_cloud.pcd"
+ROTATION_EULER = (np.pi, np.pi / 1.5, np.pi / 2)
+POINT_OFFSET = np.array([0.3, 0.0, 0.0], dtype=np.float32)
+X_LIMIT = 1.0
+TOMATO_POINTS = np.array(
+    [
+        [0.0, -0.3, 0.7],
+        [0.2, -0.21, 0.45],
+        [0.1, -0.23, 0.63],
+    ],
+    dtype=np.float32,
+)
 
-pub = rospy.Publisher("/cloud_in", sensor_msgs.msg.PointCloud2, queue_size=3)
 
-pts = np.asarray(pc.points, dtype=np.float32)
-# print(pts)
-print(pts.shape)
-print(pts.dtype)
-print(pc.points)
-# pts = pts / 1000.0
+def load_point_cloud(path: str = POINT_CLOUD_PATH) -> tuple[np.ndarray, np.ndarray]:
+    point_cloud: o3d.geometry.PointCloud = o3d.io.read_point_cloud(path)
+    rotation = point_cloud.get_rotation_matrix_from_xyz(ROTATION_EULER)
+    point_cloud = point_cloud.rotate(rotation, center=(0, 0, 0))
 
-# pts[:, -1] -= 0.6
-# pts[:, 1] -= 0.75
-pts[:, 0] += 0.3
-idx = np.where(pts[:, 0] < 1.0)
-colors = np.asarray(pc.colors)
+    points = np.asarray(point_cloud.points, dtype=np.float32)
+    colors = np.asarray(point_cloud.colors)
+    points[:, 0] += POINT_OFFSET[0]
+    return points, colors
 
-tomatoes = np.array([
-    [0.0, -0.3, 0.7],
-    [0.2, -0.21, 0.45],
-    [0.1, -0.23, 0.63],
-    # [0.67, -0.23, 0.58],
-    # [0.62, -0.23, 0.63],
-    # [0.65, -0.36, 0.6],
-], dtype=np.float32)
 
-tomato_pub = rospy.Publisher("/tomato", sensor_msgs.msg.PointCloud2, queue_size=3)
+def publish_workspace_cloud() -> None:
+    rospy.init_node("pt2", anonymous=True)
 
-c = 1000
-r = rospy.Rate(10)
-while not rospy.is_shutdown():
-    msg = convert_numpy_2_pointcloud2_color(pts[idx], colors[idx], frame_id="camera_link", maxDistColor=2)
-    pub.publish(msg)
+    cloud_publisher = rospy.Publisher("/cloud_in", sensor_msgs.msg.PointCloud2, queue_size=3)
+    tomato_publisher = rospy.Publisher("/tomato", sensor_msgs.msg.PointCloud2, queue_size=3)
+    points, colors = load_point_cloud()
+    selected_indices = np.where(points[:, 0] < X_LIMIT)
 
-    # msg2 = convert_numpy_2_pointcloud2_color(tomatoes, frame_id="platform")
-    # tomato_pub.publish(msg2)
+    print(points.shape)
+    print(points.dtype)
+    print(points)
 
-    r.sleep()
-    # c -= 1
+    rate = rospy.Rate(10)
+    while not rospy.is_shutdown():
+        message = convert_numpy_2_pointcloud2_color(
+            points[selected_indices],
+            colors[selected_indices],
+            frame_id="camera_link",
+            maxDistColor=2,
+        )
+        cloud_publisher.publish(message)
+
+        # Keep the publisher around for parity with the original script.
+        _ = tomato_publisher
+        _ = TOMATO_POINTS
+        rate.sleep()
+
+
+if __name__ == "__main__":
+    publish_workspace_cloud()

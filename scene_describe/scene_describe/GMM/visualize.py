@@ -1,71 +1,83 @@
-import numpy as np
+"""Visualization helpers for weighted quaternion samples."""
+
+from __future__ import annotations
+
+from typing import Sequence
+
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 from scipy.spatial.transform import Rotation as R
-import data_tools as tl
 
-def quat_rotate_vector(q, v):
-    """ 使用四元数 q 旋转向量 v """
-    q_rot = R.from_quat(q)
-    return q_rot.apply(v)
+try:
+    from . import data_tools as tl
+except ImportError:  # pragma: no cover - script execution fallback
+    import data_tools as tl
 
 
-def plot_quaternions_with_weights(quaternions, weights):
-    # 原始向量 (0,0,1)
-    vector = np.array([0, 0, 1])
+def quat_rotate_vector(quaternion: Sequence[float], vector: Sequence[float]) -> np.ndarray:
+    """Rotate a vector using a quaternion in ``xyzw`` format."""
+    return R.from_quat(np.asarray(quaternion, dtype=np.float64)).apply(np.asarray(vector, dtype=np.float64))
 
-    # 计算每个四元数旋转后的向量
-    rotated_vectors = np.array([quat_rotate_vector(q, vector) for q in quaternions])
 
-    # 计算平均四元数
-    avg_quat = np.mean(quaternions, axis=0)
-    avg_rotated_vector = quat_rotate_vector(avg_quat, vector)
+def plot_quaternions_with_weights(quaternions: np.ndarray, weights: np.ndarray) -> None:
+    """Visualize the rotated tool axis for each quaternion with a weight-based color map."""
+    base_vector = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+    rotated_vectors = np.asarray([quat_rotate_vector(quaternion, base_vector) for quaternion in quaternions])
+    average_quaternion = np.mean(quaternions, axis=0)
+    average_quaternion /= np.linalg.norm(average_quaternion)
+    average_vector = quat_rotate_vector(average_quaternion, base_vector)
 
-    # 创建图形
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    figure = plt.figure()
+    axis = figure.add_subplot(111, projection="3d")
 
-    # 绘制每个四元数旋转后的向量，颜色根据权重变化
-    for i in range(len(quaternions)):
-        weight = weights[i]
-        color = plt.cm.summer((weight - 0.5) / 0.5)  # 从浅绿到深绿
+    min_weight = float(np.min(weights))
+    max_weight = float(np.max(weights))
+    scale = max(max_weight - min_weight, np.finfo(np.float32).eps)
+    for rotated_vector, weight in zip(rotated_vectors, weights):
+        normalized_weight = (float(weight) - min_weight) / scale
+        color = plt.cm.summer(normalized_weight)
+        axis.quiver(
+            0.0,
+            0.0,
+            0.0,
+            rotated_vector[0],
+            rotated_vector[1],
+            rotated_vector[2],
+            color=color,
+            length=1.0,
+            normalize=True,
+        )
 
-        ax.quiver(0, 0, 0, rotated_vectors[i, 0], rotated_vectors[i, 1], rotated_vectors[i, 2],
-                  color=color, length=1.0, normalize=True)
-
-    # 绘制参考四元数旋转后的向量（黑色）
-    ax.quiver(0, 0, 0, avg_rotated_vector[0], avg_rotated_vector[1], avg_rotated_vector[2],
-              color='k', length=1.0, normalize=True, label='参考四元数')
-
-    # 设置图形标签
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-
-    # 去掉网格和坐标轴
-    ax.grid(False)  # 去掉网格
-    ax.set_axis_off()  # 去掉坐标轴
-
-    # 设置视角，调整使得箭头都能显示
-    ax.view_init(elev=30, azim=45)  # 视角调整
-
-    # 添加图例
-    ax.legend()
-
-    # 显示图形
+    axis.quiver(
+        0.0,
+        0.0,
+        0.0,
+        average_vector[0],
+        average_vector[1],
+        average_vector[2],
+        color="k",
+        length=1.0,
+        normalize=True,
+        label="Average orientation",
+    )
+    axis.set_xlabel("X")
+    axis.set_ylabel("Y")
+    axis.set_zlabel("Z")
+    axis.grid(False)
+    axis.set_axis_off()
+    axis.view_init(elev=30, azim=45)
+    axis.legend()
     plt.show()
 
 
-# 示例：一些四元数和权重数据
-path = "./dataset/data.txt"
-data = tl.data_read(path)
-data_ = tl.data_process(data)
-weights,angle = tl.getWeightsforData(data)
-quaternions = data_
-
-  # 权重，从0.5到1
-
-# 可视化四元数旋转后的向量
-plot_quaternions_with_weights(quaternions, weights)
+def main() -> None:
+    """Load the legacy demo dataset and render the quaternion visualization."""
+    data_path = "./dataset/data.txt"
+    joint_samples = tl.data_read(data_path)
+    quaternions, _ = tl.data_process(joint_samples)
+    weights, _ = tl.getWeightsforData(joint_samples)
+    plot_quaternions_with_weights(quaternions, weights)
 
 
+if __name__ == "__main__":
+    main()

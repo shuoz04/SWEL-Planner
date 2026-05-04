@@ -1,268 +1,131 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-@author: Zhiyu YANG
-@email: ZhiyuYANG96@outlook.com
-@time: 2022/4/18 下午12:37
-"""
+"""Core planner primitives and legacy visualization helpers for MPV2."""
+
+from __future__ import annotations
+
 import collections
 import heapq
-import threading
+import logging
 import os
-# from main_cbh import WeightedGMM, exp_map
-import moveit_commander
-import numpy as np
-import time
-import networkx as nx
-from typing import List, Iterable, Tuple, Any, Union, Generic, TypeVar, Dict, Callable, Sequence
-from copy import deepcopy
 import pickle
-import rospy
-import moveit_msgs.msg
-import moveit_msgs.srv
-import trajectory_msgs.msg
-import geometry_msgs.msg
-import visualization_msgs.msg
-import tf.transformations
-import std_msgs.msg
-import sensor_msgs.msg
-from scipy.stats import multivariate_normal
-from scipy.spatial.transform import Rotation as R
+import random
+import threading
+import time
+from copy import deepcopy
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Dict, Generic, Iterable, List, Optional, Sequence, Tuple, TypeVar, Union
 
-T = TypeVar('T')
+import geometry_msgs.msg
+import moveit_commander
+import moveit_msgs.msg
+import networkx as nx
+import numpy as np
+import rospy
+import sensor_msgs.msg
+import std_msgs.msg
+import tf.transformations
+import trajectory_msgs.msg
+import visualization_msgs.msg
+from planner.gmm import WeightedGMM, exp_map, log_map, quaternion_multiply, weighted_quaternion_mean
+from scipy.spatial.transform import Rotation as R
+from scipy.stats import multivariate_normal
+
+T = TypeVar("T")
+
+LOGGER = logging.getLogger(__name__)
+PLANNER_DIR = Path(__file__).resolve().parent
+GMM_DIR = PLANNER_DIR / "gmm"
+DEFAULT_TIMEOUT_SECONDS = 10000.0
+DEFAULT_CONNECT_CELL_ATTEMPTS = 5
+DEFAULT_CONNECTIVITY_PRIOR = 0.9
+DEFAULT_SOLVE_EDGE_RGBA = (0.5, 0.8, 0.5, 1.0)
+DEFAULT_LEAD_RGBA = (0.8, 0.8, 1.0, 0.5)
+DEFAULT_VALID_EDGE_RGBA = (0.2, 1.0, 0.2, 1.0)
+DEFAULT_INVALID_EDGE_RGBA = (1.0, 0.2, 0.2, 1.0)
+DEFAULT_DEMO_BOX_CELL = (8, 6, 8)
+DEFAULT_DEMO_BOX_SIZE = (0.075, 0.075, 0.075)
+DEFAULT_DEMO_FRAME_ID = "right_base_link"
+DEFAULT_JOINT_NAMES = tuple("joint{0}".format(index) for index in range(1, 8))
+DEFAULT_PATH_EXPORT_FILE = "data.txt"
+DEFAULT_SAMPLE_6D_EXPORT_FILE = "sample_6D_state_data.txt"
+DEFAULT_SAMPLE_3D_EXPORT_FILE = "sample_3D_state_data.txt"
 
 np.random.seed(2)
-
-os.environ['OMP_NUM_THREADS'] = '2'
-def weighted_quaternion_mean(q_list, weights, max_iter=20, eps=1e-6):
-    """计算加权平均四元数"""
-    q_ref = np.asarray(q_list[0], dtype=np.float64)  # 参考四元数，确保是 numpy 数组
-    q_ref /= np.linalg.norm(q_ref)  # 单位化
-
-    for _ in range(max_iter):
-        v_sum = np.zeros(3)
-        for q, w in zip(q_list, weights):
-            q = np.asarray(q, dtype=np.float64)  # 确保 q 是 numpy 数组
-            v = log_map(q, q_ref)  # 计算切空间向量
-            v_sum += w * v  # 加权求和
-        # print("v_sum:", v_sum)
-        delta_q = exp_map(v_sum, q_ref)
-        # print("delta_q:", delta_q)
-        # print("q_ref:", q_ref)
-        q_ref = quaternion_multiply(delta_q, q_ref)  # 更新参考四元数
-        q_ref /= np.linalg.norm(q_ref)  # 单位化，确保 q_ref 始终是单位四元数
-    return q_ref
-
-
-def log_map(q, q_ref):
-    """四元数到切空间映射"""
-    q = np.asarray(q, dtype=np.float64)
-    q_ref = np.asarray(q_ref, dtype=np.float64)
-
-    q_inv = np.array([q_ref[0], -q_ref[1], -q_ref[2], -q_ref[3]])  # 计算 q_ref 的共轭
-    q_diff = quaternion_multiply(q, q_inv)  # 计算 q * q_ref^(-1)
-
-    theta = np.arccos(np.clip(q_diff[0], -1, 1))  # 计算旋转角
-    if theta < 1e-6:
-        return np.zeros(3)  # 角度很小时返回零向量
-
-    return (theta / np.sin(theta)) * q_diff[1:]  # 提取虚部
-
-
-def exp_map(v, q_ref):
-    """切空间到四元数逆映射"""
-    v = np.asarray(v, dtype=np.float64)
-    q_ref = np.asarray(q_ref, dtype=np.float64)
-
-    theta = np.linalg.norm(v)  # 旋转角度
-    if theta < 1e-6:
-        return q_ref.copy()  # 零向量时返回参考四元数
-
-    q_exp = np.concatenate([[np.cos(theta)], (np.sin(theta)/theta) * v])  # 指数映射
-    return quaternion_multiply(q_exp, q_ref)  # 确保返回四元数
-
-
-
-def quaternion_multiply(q1, q2):
-    """Hamilton 乘法，计算 q1 * q2"""
-    w1, x1, y1, z1 = q1
-    w2, x2, y2, z2 = q2
-    return np.array([
-        w1*w2 - x1*x2 - y1*y2 - z1*z2,  # 实部
-        w1*x2 + x1*w2 + y1*z2 - z1*y2,  # i
-        w1*y2 - x1*z2 + y1*w2 + z1*x2,  # j
-        w1*z2 + x1*y2 - y1*x2 + z1*w2   # k
-    ])
-
-class WeightedGMM:
-    def __init__(self, n_components, shared_cov=False, max_iter=100, tol=1e-4):
-        self.K = n_components
-        self.shared_cov = shared_cov
-        self.max_iter = max_iter
-        self.tol = tol
-        self.q_ref = []
-
-    def fit(self, V, weights):
-        """V: 切空间向量 (N x 3)
-           weights: 样本权重 (N,) """
-        N, d = V.shape
-        # 初始化参数
-        kmeans = KMeans(n_clusters=self.K, n_init=10).fit(V)
-        self.pi = np.bincount(kmeans.labels_, weights=weights) / np.sum(weights)
-        self.mu = kmeans.cluster_centers_
-        if self.shared_cov:
-            self.Sigma = np.cov(V.T, aweights=weights)
-            self.Sigma = np.stack([self.Sigma] * self.K, axis=0)
-        else:
-            self.Sigma = np.array([np.cov(V[kmeans.labels_ == k].T,
-                                          aweights=weights[kmeans.labels_ == k])
-                                   for k in range(self.K)])
-
-        # EM迭代
-        prev_loglik = -np.inf
-        for it in range(self.max_iter):
-            # E-Step
-            gamma = self._e_step(V, weights)
-
-            # M-Step
-            self._m_step(V, weights, gamma)
-
-            # 计算对数似然
-            loglik = self._log_likelihood(V, weights)
-            if np.abs(loglik - prev_loglik) < self.tol:
-                break
-            prev_loglik = loglik
-
-    def _e_step(self, V, weights):
-        eps = 1e-8
-        gamma = np.zeros((len(V), self.K))
-        for k in range(self.K):
-            diff = V - self.mu[k]
-            cov = self.Sigma[k] + 1e-6 * np.eye(3)  # 正则化
-            inv_cov = np.linalg.inv(cov)
-            exp_term = -0.5 * np.sum(diff @ inv_cov * diff, axis=1)
-            det_cov = np.linalg.det(cov) + eps
-            gamma[:, k] = self.pi[k] * np.exp(exp_term) / np.sqrt(det_cov)
-
-            #gamma[:, k] = self.pi[k] * np.exp(exp_term) / np.sqrt(np.linalg.det(2 * np.pi * cov))
-        gamma *= weights[:, None]
-
-        gamma_sum = gamma.sum(axis=1, keepdims=True) + eps
-        gamma /= gamma_sum
-
-        #gamma /= gamma.sum(axis=1, keepdims=True)
-        return gamma
-
-    def _m_step(self, V, weights, gamma):
-        N_k = gamma.sum(axis=0)
-        eps = 1e-8
-        self.pi = (N_k + eps) / (N_k.sum() + eps)
-
-        #self.pi = N_k / N_k.sum()
-
-        for k in range(self.K):
-            self.mu[k] = np.sum(gamma[:, k][:, None] * weights[:, None] * V, axis=0) / (gamma[:, k] * weights).sum()
-
-        if self.shared_cov:
-            cov = np.zeros((3, 3))
-            for k in range(self.K):
-                diff = V - self.mu[k]
-                cov += (gamma[:, k, None, None] * weights[:, None, None] *
-                        np.einsum('ni,nj->nij', diff, diff)).sum(axis=0)
-            self.Sigma = cov / N_k.sum()
-            self.Sigma = np.stack([self.Sigma] * self.K, axis=0)
-        else:
-            for k in range(self.K):
-                diff = V - self.mu[k]
-                self.Sigma[k] = (gamma[:, k, None, None] * weights[:, None, None] *
-                                 np.einsum('ni,nj->nij', diff, diff)).sum(axis=0) / (N_k[k] + eps)
-
-                # self.Sigma[k] = (gamma[:, k, None, None] * weights[:, None, None] *
-                #                  np.einsum('ni,nj->nij', diff, diff)).sum(axis=0) / N_k[k]
-
-    def sample(self, n_samples):
-        k = np.random.choice(self.K, p=self.pi, size=n_samples)
-        samples = []
-        for ki in k:
-            v = np.random.multivariate_normal(self.mu[ki], self.Sigma[ki])
-            samples.append(v)
-        return np.array(samples)
-
-    def _log_likelihood(self, V, weights):
-        """计算加权对数似然"""
-        loglik = 0
-        for k in range(self.K):
-            diff = V - self.mu[k]
-            cov = self.Sigma[k] + 1e-6 * np.eye(3)  # 加上小正则项避免数值问题
-            inv_cov = np.linalg.inv(cov)
-            exp_term = -0.5 * np.sum(diff @ inv_cov * diff, axis=1)
-            loglik += np.sum(weights * (np.log(self.pi[k]) + exp_term - 0.5 * np.log(np.linalg.det(2 * np.pi * cov))))
-        return loglik
-
-
-
-
-
-
-
-
+os.environ.setdefault("OMP_NUM_THREADS", "2")
 
 
 class Magic:
+    """Namespace for planner-wide numeric types."""
+
     DataType = np.double
 
 
-def wrap_to_pi(angle: float or List or np.ndarray):
-    if isinstance(angle, float):
-        return (angle + np.pi) % (2 * np.pi) - np.pi
-    else:
-        return [wrap_to_pi(a) for a in angle]
+def wrap_to_pi(angle: Union[float, List[float], np.ndarray]) -> Union[float, List[float]]:
+    """Wrap an angle or an angle collection to ``[-pi, pi)``."""
+    if np.isscalar(angle):
+        value = float(angle)
+        return (value + np.pi) % (2 * np.pi) - np.pi
+    return [wrap_to_pi(item) for item in angle]
 
 
 class UnionFindSet(Generic[T]):
-    def __init__(self):
+    """Minimal union-find used by legacy experiments."""
+
+    def __init__(self) -> None:
         self._data = {}
 
-    def union(self, x: T, y: T):
+    def union(self, x: T, y: T) -> None:
         self._data[self.get_root(x)] = self.get_root(y)
 
     def get_root(self, x: T) -> T:
-        tmp = self._data[x]
-        if x != tmp:
-            self._data[x] = self.get_root(tmp)
-        return tmp
+        if x not in self._data:
+            self._data[x] = x
+            return x
+
+        parent = self._data[x]
+        if x != parent:
+            self._data[x] = self.get_root(parent)
+        return self._data[x]
 
 
 class Ratio:
-    def __init__(self, initial=0.0):
+    """Track successful vs total attempts."""
+
+    def __init__(self, initial: float = 0.0) -> None:
         self._data = [0, 0]
         self._value = initial
         self._should_update = False
 
-    def increase(self, num=1):
+    def increase(self, num: int = 1) -> None:
         self._data[1] += num
         self._data[0] += num
         self._should_update = True
 
-    def increase_total(self, num=1):
+    def increase_total(self, num: int = 1) -> None:
         self._data[0] += num
         self._should_update = True
 
     @property
     def value(self) -> float:
         if self._should_update:
-            self._value = self._data[1] / self._data[0]
+            total, success = self._data
+            self._value = self._value if total == 0 else success / total
+            self._should_update = False
         return self._value
 
 
 class StateSet:
-    def __init__(self):
+    """Container that supports uniform random sampling."""
+
+    def __init__(self) -> None:
         self._data = []
 
-    def add(self, s: 'State'):
+    def add(self, s: "State") -> None:
         self._data.append(s)
 
-    def sample(self) -> Union['State', None]:
+    def sample(self) -> Optional["State"]:
         if self.empty():
             return None
         return self._data[np.random.randint(0, len(self._data))]
@@ -270,14 +133,22 @@ class StateSet:
     def empty(self) -> bool:
         return len(self._data) == 0
 
+    def __len__(self) -> int:
+        return len(self._data)
+
     def __iter__(self):
-        return self._data.__iter__()
+        return iter(self._data)
 
 
 class State:
-    def __init__(self, *vals: float):
-        assert len(vals) > 0
-        self._data = np.array(vals, Magic.DataType)
+    """Mutable planner state with a stable unique id."""
+
+    __slots__ = ("_data", "_dim", "_uid")
+
+    def __init__(self, *vals: float) -> None:
+        if not vals:
+            raise ValueError("State requires at least one value.")
+        self._data = np.array(vals, dtype=Magic.DataType)
         self._dim = self._data.shape[-1]
         self._uid = id(self)
 
@@ -289,37 +160,45 @@ class State:
     def data_view(self) -> np.ndarray:
         return self._data
 
-    def expand(self, to_s: 'State', ratio=1.0) -> 'State':
+    def expand(self, to_s: "State", ratio: float = 1.0) -> "State":
         return State(*((to_s.data_view - self._data) * ratio + self._data))
 
     @property
     def uid(self) -> int:
         return self._uid
 
-    def copy(self) -> 'State':
-        s = State(*self._data)
-        s._uid = self._uid
-        return s
+    def copy(self) -> "State":
+        copied = State(*self._data)
+        copied._uid = self._uid
+        return copied
 
-    def __eq__(self, other: 'State') -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, State):
+            return False
         return other.uid == self._uid or np.allclose(self._data, other.data_view)
 
-    def __getitem__(self, idx) -> Magic.DataType:
+    def __getitem__(self, idx: int) -> Magic.DataType:
         return self._data[idx]
 
-    def __hash__(self):
+    def __iter__(self):
+        return iter(self._data)
+
+    def __hash__(self) -> int:
         return hash(self._uid)
 
-    def __str__(self):
-        return f'State{str(self._data)}'
+    def __str__(self) -> str:
+        return "State{0}".format(str(self._data))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
 
 class Space:
-    def __init__(self, lb: Tuple, ub: Tuple, check_motion_resolution=0.08):
-        assert len(lb) == len(ub)
+    """Continuous search space with state and motion validation hooks."""
+
+    def __init__(self, lb: Tuple[float, ...], ub: Tuple[float, ...], check_motion_resolution: float = 0.08) -> None:
+        if len(lb) != len(ub):
+            raise ValueError("Lower and upper bounds must have the same dimension.")
         self._lb = np.array(lb)
         self._ub = np.array(ub)
         self._check_motion_resolution = check_motion_resolution
@@ -334,55 +213,58 @@ class Space:
 
     @staticmethod
     def distance(s1: State, s2: State) -> float:
-        return np.linalg.norm(s1.data_view - s2.data_view)
+        return float(np.linalg.norm(s1.data_view - s2.data_view))
 
     def check_validity(self, s: State) -> bool:
         raise NotImplementedError
 
     def check_motion(self, s1: State, s2: State) -> bool:
-        count = np.ceil(self.distance(s1, s2) / self._check_motion_resolution)  # np.float64
-        q: List[Tuple[int, int]] = [(1, count)]
-        while q:
-            i1, i2 = q.pop()
+        distance = self.distance(s1, s2)
+        if distance == 0:
+            return self.check_validity(s1)
+
+        count = max(1, int(np.ceil(distance / self._check_motion_resolution)))
+        queue = [(1, count)]
+        while queue:
+            i1, i2 = queue.pop()
             mid = (i1 + i2) // 2
             if not self.check_validity(s1.expand(s2, mid / count)):
                 return False
             if i1 < mid:
-                q.append((i1, mid - 1))
+                queue.append((i1, mid - 1))
             if i2 > mid:
-                q.append((mid + 1, i2))
+                queue.append((mid + 1, i2))
         return True
 
     def sample_uniform(self) -> State:
-        return State(*np.random.uniform(self._lb, self._ub))##返回6维度的随机均匀state
+        return State(*np.random.uniform(self._lb, self._ub))
 
 
 class Cell:
-    def __init__(self, rid: Tuple, ws: Space):
+    """One workspace cell in the decomposition graph."""
+
+    def __init__(self, rid: Tuple[int, ...], ws: Space) -> None:
         self._rid = rid
         self._dim = len(rid)
         self._neighbors = tuple()
         self._ws = ws
-        #
         self._start_set = StateSet()
-        #
         self.free_vol = 1.0
         self.total_states = []
 
-    def set_neighbors(self, nbrs: Tuple['Cell']):
+    def set_neighbors(self, nbrs: Tuple["Cell", ...]) -> None:
         self._neighbors = nbrs
 
     @property
-    def neighbors(self) -> Tuple['Cell']:
+    def neighbors(self) -> Tuple["Cell", ...]:
         return self._neighbors
 
-    # with same sequence as Cell.neighbors
     @property
-    def border_centers(self) -> Sequence[np.ndarray]:                                   ###计算了两个栅格边界的中心点位置
+    def border_centers(self) -> Sequence[np.ndarray]:
         return [(cell.center_pos + self.center_pos) / 2 for cell in self.neighbors]
 
     @property
-    def rid(self) -> Tuple:
+    def rid(self) -> Tuple[int, ...]:
         return self._rid
 
     @property
@@ -391,13 +273,13 @@ class Cell:
 
     @property
     def center_pos(self) -> np.ndarray:
-        return ((self.ws.ub + self.ws.lb) / 2.0)[:self.dim]
+        return ((self.ws.ub + self.ws.lb) / 2.0)[: self.dim]
 
     @property
     def ws(self) -> Space:
         return self._ws
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self._rid)
 
     @property
@@ -407,47 +289,49 @@ class Cell:
     @property
     def start_set(self) -> StateSet:
         return self._start_set
-"""
-    decomp = JakaDecomp(
-        (-1.0, -1.0, -1.0, -np.pi, -np.pi, -np.pi),
-        (1.0, 1.0, 1.0, np.pi, np.pi, np.pi),
-        (12, 12, 12)
-    )
-"""
 
-class Decomposition:                                                   #
-    def __init__(self, lb: Tuple, ub: Tuple, slices: Tuple):
-        assert len(lb) == len(ub)
+
+class Decomposition:
+    """Workspace decomposition used by the planner."""
+
+    def __init__(self, lb: Tuple[float, ...], ub: Tuple[float, ...], slices: Tuple[int, ...]) -> None:
+        if len(lb) != len(ub):
+            raise ValueError("Lower and upper bounds must have the same dimension.")
+
         self._dim = len(slices)
-        slices = tuple(slices[i] if i < len(slices) else 1 for i in range(len(lb)))
+        normalized_slices = tuple(slices[index] if index < len(slices) else 1 for index in range(len(lb)))
         self._lb = np.array(lb)
         self._ub = np.array(ub)
-        self._interval = ((self._ub - self._lb) / slices)
-        #
+        self._interval = (self._ub - self._lb) / normalized_slices
         self._cells_dict = {}
-        grid_graph: nx.Graph = nx.grid_graph(slices)
+
+        grid_graph = nx.grid_graph(normalized_slices)
         for rid in grid_graph.nodes:
-            rid = rid[::-1]
-            simple_rid = rid[:self.dim]
-            self._cells_dict[simple_rid] = Cell(simple_rid,
-                                                Space(self._lb + self._interval * rid,
-                                                      self._lb + self._interval * tuple(map(lambda x: x + 1, rid))))
+            reversed_rid = rid[::-1]
+            simple_rid = reversed_rid[: self._dim]
+            lower = self._lb + self._interval * reversed_rid
+            upper = self._lb + self._interval * tuple(index + 1 for index in reversed_rid)
+            self._cells_dict[simple_rid] = Cell(simple_rid, Space(tuple(lower), tuple(upper)))
+
         for rid in grid_graph.nodes:
-            self._cells_dict[rid[::-1][:self.dim]].set_neighbors(
-                tuple(self._cells_dict[nbr_rid[::-1][:self._dim]] for nbr_rid in grid_graph.neighbors(rid)))
-        #
-        self._connecty_dict: Dict[Tuple, Ratio] = collections.defaultdict(lambda: Ratio(initial=0.9))
+            simple_rid = rid[::-1][: self._dim]
+            self._cells_dict[simple_rid].set_neighbors(
+                tuple(self._cells_dict[nbr[::-1][: self._dim]] for nbr in grid_graph.neighbors(rid))
+            )
+
+        self._connecty_dict = collections.defaultdict(lambda: Ratio(initial=DEFAULT_CONNECTIVITY_PRIOR))
         self.set_cell_free_vol()
 
-    def set_cell_free_vol(self):
+    def set_cell_free_vol(self) -> None:
         self._set_cell_free_vol(self._cells_dict)
 
     @staticmethod
-    def _set_cell_free_vol(cells_dict: Dict[Tuple, Cell]):
+    def _set_cell_free_vol(cells_dict: Dict[Tuple[int, ...], Cell]) -> None:
         raise NotImplementedError
 
     def get_connecty_ratio(self, c1: Cell, c2: Cell) -> Ratio:
-        assert c1.rid != c2.rid
+        if c1.rid == c2.rid:
+            raise ValueError("Connectivity ratio is only defined for two distinct cells.")
         return self._connecty_dict[tuple(sorted([c1.rid, c2.rid]))]
 
     @property
@@ -455,144 +339,189 @@ class Decomposition:                                                   #
         return self._dim
 
     def project(self, s: State) -> Cell:
-        ws_s = self.fk(s)
-        rid = (ws_s.data_view - self._lb) / self._interval
-        rid = tuple(map(int, rid[:self.dim]))
+        ws_state = self.fk(s)
+        rid = (ws_state.data_view - self._lb) / self._interval
+        rid = tuple(map(int, rid[: self.dim]))
         return self._cells_dict[rid]
 
     def fk(self, s: State) -> State:
         raise NotImplementedError
 
-    def _sample_in_cell(self, cell: Cell, seed: Union[None, State]) -> State:
+    def _sample_in_cell(self, cell: Cell, seed: Optional[State]) -> Optional[State]:
         raise NotImplementedError
 
-    def sample_in_cell(self, cell: Cell) -> Union[State, None]:
-        nbr_cells: List[Cell] = [cell, *cell.neighbors]
-        np.random.shuffle(nbr_cells)
+    def sample_in_cell(self, cell: Cell) -> Optional[State]:
+        neighbors = [cell]
+        neighbors.extend(cell.neighbors)
+        np.random.shuffle(neighbors)
         seed = None
-        for _cell in nbr_cells:
-            seed = _cell.start_set.sample()           #从cell中的state集合中随机取一个state
-            if seed:
+        for neighbor in neighbors:
+            seed = neighbor.start_set.sample()
+            if seed is not None:
                 break
-        if seed:
-            return self._sample_in_cell(cell, seed=seed)
-        else:
-            return self._sample_in_cell(cell, seed=None)
+        return self._sample_in_cell(cell, seed)
 
-    def get_cell(self, rid: Tuple) -> Cell:
+    def moveit_ik(self, workspace_state: State, seed: State) -> Optional[State]:
+        """Compatibility wrapper for decomposition IK implementations."""
+        ik_solver = getattr(self, "moveit_ik_impl", None)
+        if callable(ik_solver):
+            return ik_solver(workspace_state, seed)
+
+        legacy_solver = getattr(self, "_moveit_ik", None)
+        if callable(legacy_solver):
+            return legacy_solver(workspace_state, seed)
+
+        raise NotImplementedError("Decomposition subclasses must provide a MoveIt IK implementation.")
+
+    def get_cell(self, rid: Tuple[int, ...]) -> Cell:
         return self._cells_dict[rid]
 
     def get_all_cells(self) -> Sequence[Cell]:
         return [self._cells_dict[key] for key in self._cells_dict]
 
+
+@dataclass(order=True)
+class _LeadQueueNode:
+    """Priority queue node for the coarse cell search."""
+
+    cur_w: float
+    cell: Cell = field(compare=False)
+    cur_pos: np.ndarray = field(compare=False)
+    route: List[Cell] = field(compare=False, default_factory=list)
+
+
 class STP:
-    def __init__(self, space: Space, decomp: Decomposition):
+    """Sampling Task Planner."""
+
+    def __init__(
+        self,
+        space: Space,
+        decomp: Decomposition,
+        timeout: float = DEFAULT_TIMEOUT_SECONDS,
+        connect_cell_attempts: int = DEFAULT_CONNECT_CELL_ATTEMPTS,
+        interactive: bool = True,
+        viz: Optional["Viz"] = None,
+    ) -> None:
         self.space = space
         self.decomp = decomp
-        #
         self.g = nx.Graph()
-        #
-        self.timeout_ = 10000.0  # s
-        #
-        self.viz = Viz()
+        self.timeout_ = timeout
+        self.connect_cell_attempts = connect_cell_attempts
+        self.interactive = interactive
+        self.viz = viz if viz is not None else Viz()
+
+    def _wait_for_gui(self, message: str) -> None:
+        if self.interactive:
+            self.viz.wait_for_gui(message)
 
     def compute_lead(self, start_cell: Cell, goal_cell: Cell) -> Sequence[Cell]:
-        class CellNode:
-            def __init__(self, w_: float, cell_: Cell, cur_pos: np.ndarray, route_: List[Cell]):
-                self.cur_w = w_
-                self.route = route_
-                self.cell = cell_
-                self.cur_pos = cur_pos
-
-            def __lt__(self, other: 'CellNode'):
-                return self.cur_w < other.cur_w
-
-        q = [CellNode(0.0, start_cell, start_cell.center_pos, [])]
+        queue = [_LeadQueueNode(0.0, start_cell, start_cell.center_pos, [])]
         visited = set()
-        while q:
-            node = heapq.heappop(q)
+
+        while queue:
+            node = heapq.heappop(queue)
             if node.cell in visited:
                 continue
+
             route = node.route + [node.cell]
             visited.add(node.cell)
             if node.cell.rid == goal_cell.rid:
                 return route
-            for nbr_cell, border_center in zip(node.cell.neighbors, node.cell.border_centers):
-                if nbr_cell in visited:
-                    continue
-                # calc weight
-                distance = np.linalg.norm(node.cur_pos - border_center)
-                connecty = self.decomp.get_connecty_ratio(nbr_cell, node.cell).value
-                free_vol = nbr_cell.free_vol
-                nxt_w = distance * np.exp(-10 * connecty) / (1e-3 + free_vol)
-                if node.cell.rid == (8, 4) and nbr_cell.rid == (8, 5):
-                    print(f"con: {node.cell.rid} -> {nbr_cell.rid} = {connecty:.3f}")
-                #
-                heapq.heappush(q, CellNode(node.cur_w + nxt_w, nbr_cell, border_center, route))
-        raise RuntimeError
 
-    def add_motion(self, s1: State, s2: State):
+            for neighbor, border_center in zip(node.cell.neighbors, node.cell.border_centers):
+                if neighbor in visited:
+                    continue
+                distance = np.linalg.norm(node.cur_pos - border_center)
+                connectivity = self.decomp.get_connecty_ratio(neighbor, node.cell).value
+                next_weight = distance * np.exp(-10 * connectivity) / (1e-3 + neighbor.free_vol)
+                heapq.heappush(queue, _LeadQueueNode(node.cur_w + next_weight, neighbor, border_center, route))
+
+        raise RuntimeError("Failed to compute a lead between the start and goal cells.")
+
+    def add_motion(self, s1: State, s2: State) -> None:
         self.g.add_edge(s1, s2, w=self.space.distance(s1, s2))
-        self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0.5, 0.8, 0.5, 1.0), dim=self.decomp.dim)
-        self.viz.wait_for_gui()
+        self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=DEFAULT_SOLVE_EDGE_RGBA, dim=self.decomp.dim)
+        self._wait_for_gui("wait for motion review")
+
+    def _connect_cell_from_previous(self, cell: Cell, prev_cell: Cell) -> bool:
+        if cell.is_connect_to_start:
+            return True
+
+        ratio = self.decomp.get_connecty_ratio(prev_cell, cell)
+        for _ in range(self.connect_cell_attempts):
+            new_state = self.decomp.sample_in_cell(cell)
+            if new_state is None:
+                continue
+            cell.total_states.append(new_state)
+            previous_state = prev_cell.start_set.sample()
+            if previous_state is None:
+                break
+
+            if self.space.check_motion(new_state, previous_state):
+                cell.start_set.add(new_state)
+                self.add_motion(previous_state, new_state)
+                ratio.increase()
+                LOGGER.info("Cell %s connected to the start frontier.", cell.rid)
+                return True
+
+            ratio.increase_total()
+
+        return False
 
     def solve(self, start: State, goal: State) -> Sequence[State]:
         start_cell = self.decomp.project(start)
         goal_cell = self.decomp.project(goal)
-
         start_cell.start_set.add(start)
+        self.g.add_node(start)
+        self.g.add_node(goal)
 
-        connect_cell_attempts = 5  # TODO: param
-
-        print("begin loop")
+        LOGGER.info("Starting STP solve loop.")
         path = []
-        t = time.time()
-        while len(path) == 0 and self.timeout_ > time.time() - t:
-            self.viz.wait_for_gui("wait for current loop")
-            print("compute_lead")
+        if start_cell.rid == goal_cell.rid:
+            LOGGER.info("Start and goal project to the same cell %s.", start_cell.rid)
+            if self.space.check_motion(start, goal):
+                self.add_motion(start, goal)
+                path = [start, goal]
+                self._wait_for_gui("wait for finish")
+                self.viz.publish_trajectory(path)
+                return path
+            LOGGER.info("Direct same-cell motion is invalid; falling back to the generic solve loop.")
+
+        started_at = time.time()
+        while not path and (time.time() - started_at) < self.timeout_:
+            self._wait_for_gui("wait for current loop")
             lead = self.compute_lead(start_cell, goal_cell)
+            self.viz.publish_cells(lead, DEFAULT_LEAD_RGBA)
+            self._wait_for_gui("wait for sample")
 
-            self.viz.publish_cells(lead, (0.8, 0.8, 1.0, 0.5))
-            self.viz.wait_for_gui("wait for sample")
+            for index in range(1, len(lead) - 1):
+                if not self._connect_cell_from_previous(lead[index], lead[index - 1]):
+                    break
 
-            num = len(lead)
-            for i in range(1, num - 1):
-                cell: Cell = lead[i]
-                prev_cell: Cell = lead[i - 1]
-                if not cell.is_connect_to_start:
-                    for _ in range(connect_cell_attempts):
-                        new_s = self.decomp.sample_in_cell(cell)
-                        if not new_s:
-                            continue
-                        print(f"successfully sampled in f{cell.rid}")
-                        cell.total_states.append(new_s)
-                        prev_s = prev_cell.start_set.sample()
-                        assert prev_s is not None
-                        r = self.decomp.get_connecty_ratio(prev_cell, cell)
-                        if self.space.check_motion(new_s, prev_s):
-                            cell.start_set.add(new_s)
-                            self.add_motion(prev_s, new_s)
-                            r.increase()
-                            print(f"{cell.rid} is connected to start")
-                            break
-                        else:
-                            r.increase_total()
-                    if not cell.is_connect_to_start:
-                        break
             if lead[-2].is_connect_to_start:
-                print(f"try to connect goal cell")
-                for s in lead[-2].start_set:
-                    if self.space.check_motion(s, goal):
-                        self.add_motion(s, goal)
-                        path = nx.dijkstra_path(self.g, start, goal, weight='w')
-                        print("found")
+                LOGGER.info("Attempting to connect the goal cell.")
+                for state in lead[-2].start_set:
+                    if self.space.check_motion(state, goal):
+                        self.add_motion(state, goal)
+                        path = nx.dijkstra_path(self.g, start, goal, weight="w")
+                        LOGGER.info("Found a path with %d states.", len(path))
                         break
-        self.viz.wait_for_gui("wait for finish")
-        self.viz.publish_trajectory(path)
+
+        self._wait_for_gui("wait for finish")
+        if path:
+            self.viz.publish_trajectory(path)
+        else:
+            LOGGER.warning("No path found before timeout.")
         return path
 
     @staticmethod
-    def add_obj(scene, name, xyz, size, frame_id):
+    def add_obj(
+        scene: moveit_commander.PlanningSceneInterface,
+        name: str,
+        xyz: Sequence[float],
+        size: Sequence[float],
+        frame_id: str,
+    ) -> None:
         pose_msg = geometry_msgs.msg.PoseStamped()
         pose_msg.header.frame_id = frame_id
         pose_msg.pose.position.x = xyz[0]
@@ -600,1128 +529,730 @@ class STP:
         pose_msg.pose.position.z = xyz[2]
         pose_msg.pose.orientation.w = 1.0
         scene.add_box(name, pose_msg, size)
-        # wait
-        obj = scene.get_objects([name])
-        r = rospy.Rate(30)
-        while len(obj.keys()) == 0:
-            obj = scene.get_objects([name])
-            r.sleep()
-        rospy.loginfo(f"successfully add box: `{name}`")
 
-    def plot(self, start: State, goal: State):
+        rate = rospy.Rate(30)
+        while not rospy.is_shutdown():
+            if scene.get_objects([name]):
+                break
+            rate.sleep()
+        rospy.loginfo("Successfully added box: `%s`", name)
+
+    def _create_scene_interface(self) -> moveit_commander.PlanningSceneInterface:
         scene = moveit_commander.PlanningSceneInterface()
         rospy.sleep(0.5)
-        scene.remove_world_object("box")
-        self.add_obj(scene, 'box', self.decomp.get_cell((8, 6, 8)).center_pos, (0.075, 0.075, 0.075), 'right_base_link')
+        return scene
 
-        self.decomp.get_cell((8, 6, 8)).free_vol = 0.2
+    def _prepare_demo_scene(
+        self,
+        box_cell: Tuple[int, int, int] = DEFAULT_DEMO_BOX_CELL,
+        box_size: Tuple[float, float, float] = DEFAULT_DEMO_BOX_SIZE,
+        frame_id: str = DEFAULT_DEMO_FRAME_ID,
+        remove_existing: bool = True,
+    ) -> moveit_commander.PlanningSceneInterface:
+        scene = self._create_scene_interface()
+        if remove_existing:
+            scene.remove_world_object("box")
+        self.add_obj(scene, "box", self.decomp.get_cell(box_cell).center_pos, box_size, frame_id)
+        self.decomp.get_cell(box_cell).free_vol = 0.2
+        return scene
+
+    def _create_graph_with_terminals(self, start: State, goal: State) -> nx.Graph:
+        graph = nx.Graph()
+        graph.add_node(start)
+        graph.add_node(goal)
+        return graph
+
+    def _sample_state(self, cell: Cell) -> State:
+        while True:
+            state = self.decomp.sample_in_cell(cell)
+            if state is not None:
+                return state
+
+    def _sample_state_layers(
+        self,
+        cells: Sequence[Cell],
+        samples_per_cell: int,
+        graph: Optional[nx.Graph] = None,
+        publish_states: bool = True,
+        add_to_start_set: bool = True,
+        skip: Optional[Callable[[int, int, State], bool]] = None,
+    ) -> List[List[State]]:
+        layers = []
+        for cell_index, cell in enumerate(cells):
+            layer = []
+            for sample_index in range(samples_per_cell):
+                state = self._sample_state(cell)
+                if skip is not None and skip(cell_index, sample_index, state):
+                    continue
+                if add_to_start_set:
+                    cell.start_set.add(state)
+                layer.append(state)
+                if graph is not None:
+                    graph.add_node(state)
+                if publish_states:
+                    self.viz.publish_state(self.decomp.fk(state))
+            layers.append(layer)
+        return layers
+
+    def _connect_layers(
+        self,
+        graph: nx.Graph,
+        state_layers: Sequence[Sequence[State]],
+        dim: int = 3,
+        randomize_valid_visuals: bool = False,
+    ) -> int:
+        added_edges = 0
+        for index in range(1, len(state_layers)):
+            prev_states = state_layers[index - 1]
+            current_states = state_layers[index]
+            for s1 in prev_states:
+                for s2 in current_states:
+                    is_valid = self.space.check_motion(s1, s2)
+                    rgba = DEFAULT_VALID_EDGE_RGBA
+                    if not is_valid:
+                        rgba = DEFAULT_INVALID_EDGE_RGBA
+                    elif randomize_valid_visuals and random.random() >= 0.5:
+                        rgba = DEFAULT_VALID_EDGE_RGBA
+                    self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=rgba, dim=dim)
+                    if is_valid:
+                        graph.add_edge(s1, s2, w=self.space.distance(s1, s2))
+                        added_edges += 1
+        return added_edges
+
+    def _filter_invalid_nodes(self, graph: nx.Graph) -> int:
+        invalid_nodes = [node for node in graph.nodes() if not self.space.check_validity(node)]
+        graph.remove_nodes_from(invalid_nodes)
+        return len(invalid_nodes)
+
+    def _fully_connect_graph(self, graph: nx.Graph) -> int:
+        nodes = list(graph.nodes())
+        added_edges = 0
+        for index, node_1 in enumerate(nodes):
+            for node_2 in nodes[:index]:
+                if self.space.check_motion(node_1, node_2):
+                    graph.add_edge(node_1, node_2, w=self.space.distance(node_1, node_2))
+                    added_edges += 1
+        return added_edges
+
+    def _append_joint_states(self, path: Union[str, Path], states: Iterable[State]) -> None:
+        with Path(path).open("a") as handle:
+            for state in states:
+                handle.write("{0}\n".format(str(state.data_view)))
+
+    def _append_workspace_samples(
+        self,
+        path: Union[str, Path],
+        graph: nx.Graph,
+        include_normalized_degree: bool = False,
+    ) -> None:
+        file_path = Path(path)
+        node_count = graph.number_of_nodes()
+        with file_path.open("a") as handle:
+            for node in graph.nodes():
+                workspace_state = self.decomp.fk(node).data_view[:3]
+                if include_normalized_degree and node_count > 1:
+                    degree = graph.degree(node) / float(node_count - 1)
+                    handle.write("{0}\n".format(str([workspace_state, degree])))
+                else:
+                    handle.write("{0}\n".format(str(workspace_state)))
+
+    def _append_path_states(
+        self,
+        path: Union[str, Path],
+        paths_with_lengths: Sequence[Tuple[Sequence[State], float]],
+    ) -> None:
+        with Path(path).open("a") as handle:
+            for route, _ in paths_with_lengths:
+                for state in route[1:-1]:
+                    for value in state:
+                        handle.write("{0}\n".format(value))
+
+    @staticmethod
+    def _log_graph_status(graph: nx.Graph, prefix: str) -> None:
+        LOGGER.info("%s %d nodes and %d edges.", prefix, graph.number_of_nodes(), graph.number_of_edges())
+
+    def _sample_graph_from_cell(
+        self,
+        cell: Cell,
+        graph: nx.Graph,
+        limit: int,
+        accept_state: Optional[Callable[[State, State], bool]] = None,
+    ) -> None:
+        while graph.number_of_nodes() < limit:
+            state = self._sample_state(cell)
+            cell.start_set.add(state)
+            workspace_state = self.decomp.fk(state)
+            if accept_state is not None and not accept_state(state, workspace_state):
+                continue
+            graph.add_node(state)
+            self.viz.publish_state(workspace_state)
+
+    def plot(self, start: State, goal: State) -> None:
+        self._prepare_demo_scene()
         start_cell = self.decomp.project(start)
         goal_cell = self.decomp.project(goal)
-
         lead = self.compute_lead(start_cell, goal_cell)
         self.viz.publish_cells(lead, (0.8, 0.8, 1.0, 0.35))
 
-        s0 = State(*np.deg2rad([-9.1008, 59.98469999, -45.0142, -17.02055001, -115.01136001, 0.]))
-        self.viz.publish_motion(self.decomp.fk, [start, s0], (0.8, 0.5, 0.5, 1.0), dim=3)
-        s0 = State(*np.deg2rad([-6.02928, 66.67599999, -45., -17., -115., 0.]))
-        self.viz.publish_motion(self.decomp.fk, [start, s0], (0.8, 0.5, 0.5, 1.0), dim=3)
-        s0 = State(*np.deg2rad([-6.02928, 59.32109999, -47.0603, -25.97915001, -136.17072001, 0.]))
-        self.viz.publish_motion(self.decomp.fk, [start, s0], (0.8, 0.5, 0.5, 1.0), dim=3)
-        self.viz.wait_for_gui("wait for finish")
-        #
-        lead2 = [self.decomp.get_cell((9, 5, 8)),
-                 self.decomp.get_cell((9, 5, 7)),
-                 *lead[2:]]
-        self.viz.publish_cells(lead2, (0.8, 0.8, 1.0, 0.5))
-        self.viz.wait_for_gui("wait for finish")
-        #
-        s1 = State(*np.deg2rad([-21.15936, 62.27964999, - 85.30025, 29.92914999, - 105.91056001, - 48.40488]))
-        self.viz.publish_motion(self.decomp.fk, [start, s1], (0.5, 0.8, 0.5, 1.0), dim=3)
-        s2 = State(*np.deg2rad([-6.02928, 57.85564999, -86.7657, 49.03529999, -96.80976001, -43.40488]))
-        self.viz.publish_motion(self.decomp.fk, [s1, s2], (0.5, 0.8, 0.5, 1.0), dim=3)
-        s3 = State(*np.deg2rad([15.13008, 57.85564999, -86.7657, 49.03529999, -96.80976001, -76.40488]))
-        self.viz.publish_motion(self.decomp.fk, [s2, s3], (0.5, 0.8, 0.5, 1.0), dim=3)
-        s4 = State(*np.deg2rad([30.26016, 75.52399999, -107.36495001, 51.99384999, -66.5496, -23.40488]))
-        self.viz.publish_motion(self.decomp.fk, [s3, s4], (0.5, 0.8, 0.5, 1.0), dim=3)
-        self.viz.publish_motion(self.decomp.fk, [s4, goal], (0.5, 0.8, 0.5, 1.0), dim=3)
-        self.viz.wait_for_gui("wait for finish")
-        #
-        lead3 = [*lead2[:3],
-                 self.decomp.get_cell((9, 6, 6)),
-                 self.decomp.get_cell((9, 7, 6)),
-                 self.decomp.get_cell((8, 7, 6)),
-                 *lead2[-2:],
-                 ]
-        self.viz.publish_cells(lead3, (0.8, 0.8, 1.0, 0.5))
-        self.viz.wait_for_gui("wait for finish")
-        #
+        initial_candidates = [
+            State(*np.deg2rad([-9.1008, 59.98469999, -45.0142, -17.02055001, -115.01136001, 0.0])),
+            State(*np.deg2rad([-6.02928, 66.67599999, -45.0, -17.0, -115.0, 0.0])),
+            State(*np.deg2rad([-6.02928, 59.32109999, -47.0603, -25.97915001, -136.17072001, 0.0])),
+        ]
+        for candidate in initial_candidates:
+            self.viz.publish_motion(self.decomp.fk, [start, candidate], (0.8, 0.5, 0.5, 1.0), dim=3)
+        self._wait_for_gui("wait for finish")
 
-    def plot2(self, start: State, goal: State):
+        lead2 = [self.decomp.get_cell((9, 5, 8)), self.decomp.get_cell((9, 5, 7))]
+        lead2.extend(lead[2:])
+        self.viz.publish_cells(lead2, DEFAULT_LEAD_RGBA)
+        self._wait_for_gui("wait for finish")
 
-        # ycr edit
-        scene = moveit_commander.PlanningSceneInterface()
-        rospy.sleep(0.5)
-        scene.remove_world_object("box")
-        self.add_obj(scene, 'box', self.decomp.get_cell((8, 6, 8)).center_pos, (0.075, 0.075, 0.075), 'right_base_link')
-        self.decomp.get_cell((8, 6, 8)).free_vol = 0.2
-        # ycr edit
+        scripted_path = [
+            State(*np.deg2rad([-21.15936, 62.27964999, -85.30025, 29.92914999, -105.91056001, -48.40488])),
+            State(*np.deg2rad([-6.02928, 57.85564999, -86.7657, 49.03529999, -96.80976001, -43.40488])),
+            State(*np.deg2rad([15.13008, 57.85564999, -86.7657, 49.03529999, -96.80976001, -76.40488])),
+            State(*np.deg2rad([30.26016, 75.52399999, -107.36495001, 51.99384999, -66.5496, -23.40488])),
+        ]
+        previous_state = start
+        for state in scripted_path:
+            self.viz.publish_motion(self.decomp.fk, [previous_state, state], (0.5, 0.8, 0.5, 1.0), dim=3)
+            previous_state = state
+        self.viz.publish_motion(self.decomp.fk, [previous_state, goal], (0.5, 0.8, 0.5, 1.0), dim=3)
+        self._wait_for_gui("wait for finish")
 
+        lead3 = [lead2[0], lead2[1], lead2[2], self.decomp.get_cell((9, 6, 6)), self.decomp.get_cell((9, 7, 6)), self.decomp.get_cell((8, 7, 6))]
+        lead3.extend(lead2[-2:])
+        self.viz.publish_cells(lead3, DEFAULT_LEAD_RGBA)
+        self._wait_for_gui("wait for finish")
+
+    def plot2(self, start: State, goal: State) -> None:
+        self._prepare_demo_scene()
         start_cell = self.decomp.project(start)
         goal_cell = self.decomp.project(goal)
         lead = self.compute_lead(start_cell, goal_cell)
-        # self.viz.publish_cells(lead, (0.8, 0.8, 1.0, 0.5))
-        self.viz.wait_for_gui("calc 0st lead: ok")
+        self._wait_for_gui("calc 0st lead: ok")
 
         self.viz.publish_state(self.decomp.fk(start))
         self.viz.publish_state(self.decomp.fk(goal))
-
-     
-        lead2 = [self.decomp.get_cell((9, 5, 8)),
-                 self.decomp.get_cell((9, 5, 7)),
-                 *lead[2:]]
-        # for cell in lead2:
-        #     print(cell.center_pos)
-        self.viz.publish_cells(lead2, (0.8, 0.8, 1.0, 0.5))
-        self.viz.wait_for_gui("calc 1st lead: ok")
+        lead2 = [self.decomp.get_cell((9, 5, 8)), self.decomp.get_cell((9, 5, 7))]
+        lead2.extend(lead[2:])
+        self.viz.publish_cells(lead2, DEFAULT_LEAD_RGBA)
+        self._wait_for_gui("calc 1st lead: ok")
 
         start_cell.start_set.add(start)
-        g = nx.Graph()
-        g.add_node(start)
-        g.add_node(goal)
-        #
-        states = []
-        for idx, cell in enumerate(lead2):
-            tmp = []
-            for _ in range(3):
-                s = self.decomp.sample_in_cell(cell)
-                if s is None:
-                    continue
-                if idx == 3 and _ == 0:
-                    continue
-                cell.start_set.add(s)
-                tmp.append(s)
-                g.add_node(s)
-                # print(s)
-                print(self.decomp.fk(s))
-                self.viz.publish_state(self.decomp.fk(s))
-            states.append(tmp)
+        graph = self._create_graph_with_terminals(start, goal)
+        states = self._sample_state_layers(
+            lead2,
+            3,
+            graph=graph,
+            skip=lambda cell_index, sample_index, _state: cell_index == 3 and sample_index == 0,
+        )
         states[0].append(start)
         states[-1].append(goal)
-        self.viz.wait_for_gui("sample along 1st lead: ok")
-        #
-        for i in range(1, len(states)):
-            ss1, ss2 = states[i - 1], states[i]
-            for s1 in ss1:
-                for s2 in ss2:
-                    validity = self.space.check_motion(s1, s2)
-                    self.viz.publish_motion(self.decomp.fk, [s1, s2],
-                                            rgba=(1, 0.2, 0.2, 1) if not validity else (0.2, 1, 0.2, 1), dim=3)
-                    if validity:
-                        g.add_edge(s1, s2, w=self.space.distance(s1, s2))
-            # break
-        print("has path?", nx.has_path(g, start, goal))
-        self.viz.wait_for_gui("check connecty: ok")
-        #
-        lead3 = [*lead2[:3],
-                 self.decomp.get_cell((9, 6, 6)),
-                 self.decomp.get_cell((9, 7, 6)),
-                 self.decomp.get_cell((8, 7, 6)),
-                 *lead2[-2:],
-                 ]
-        self.viz.publish_cells(lead3, (0.8, 0.8, 1.0, 0.5))
-        self.viz.wait_for_gui("calc 2st lead: ok")
-        #
-        states3 = [states[2]]
-        for i in range(3, 6):
-            tmp = []
-            for _ in range(3):
-                s = self.decomp.sample_in_cell(lead3[i])
-                if s is None:
-                    continue
-                lead3[i].start_set.add(s)
-                tmp.append(s)
-                self.viz.publish_state(self.decomp.fk(s))
-            states3.append(tmp)
-        self.viz.wait_for_gui("sample along 3st lead: ok")
-        states3.append(states[4])
-        #
-        for i in range(1, len(states3)):
-            ss1, ss2 = states3[i - 1], states3[i]
-            for s1 in ss1:
-                for s2 in ss2:
-                    validity = self.space.check_motion(s1, s2)
-                    self.viz.publish_motion(self.decomp.fk, [s1, s2],
-                                            rgba=(1, 0.2, 0.2, 1) if not validity else (0.2, 1, 0.2, 1), dim=3)
-                    if validity:
-                        g.add_edge(s1, s2, w=self.space.distance(s1, s2))
-            # break
-        self.viz.wait_for_gui("check connecty: ok")
-        print("has path?", nx.has_path(g, start, goal))
-        path = nx.dijkstra_path(g, start, goal, weight='w')
-        # print(path)
-        for i in range(1, len(path)):
-            s1, s2 = path[i - 1], path[i]
-            self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0.9, 0.9, 0.2, 1), dim=3, lw=0.01)
+        self._wait_for_gui("sample along 1st lead: ok")
 
-    def plot3(self):
+        self._connect_layers(graph, states, dim=3)
+        LOGGER.info("First lead graph has path: %s", nx.has_path(graph, start, goal))
+        self._wait_for_gui("check connecty: ok")
+
+        lead3 = [lead2[0], lead2[1], lead2[2], self.decomp.get_cell((9, 6, 6)), self.decomp.get_cell((9, 7, 6)), self.decomp.get_cell((8, 7, 6))]
+        lead3.extend(lead2[-2:])
+        self.viz.publish_cells(lead3, DEFAULT_LEAD_RGBA)
+        self._wait_for_gui("calc 2st lead: ok")
+
+        states3 = [states[2]]
+        states3.extend(self._sample_state_layers(lead3[3:6], 3, graph=None))
+        states3.append(states[4])
+        self._wait_for_gui("sample along 3st lead: ok")
+
+        self._connect_layers(graph, states3, dim=3)
+        self._wait_for_gui("check connecty: ok")
+        LOGGER.info("Second lead graph has path: %s", nx.has_path(graph, start, goal))
+        path = nx.dijkstra_path(graph, start, goal, weight="w")
+        for index in range(1, len(path)):
+            self.viz.publish_motion(self.decomp.fk, [path[index - 1], path[index]], rgba=(0.9, 0.9, 0.2, 1.0), dim=3, lw=0.01)
+
+    def plot3(self) -> None:
         rospy.sleep(1)
         self.viz.publish_cells(self.decomp.get_all_cells(), (0.8, 0.8, 1.0, 0.3))
-        self.viz.wait_for_gui("wait")
+        self._wait_for_gui("wait")
 
-    # ycr edit
-    def plot4(self):
-        # gengxin d hanshu
+    def plot4(self) -> None:
+        self.plot3()
 
-        rospy.sleep(1)
-        self.viz.publish_cells(self.decomp.get_cell(), (0.8, 0.8, 1.0, 0.3))
-        self.viz.wait_for_gui("wait")
+    def publish(self) -> None:
+        self.viz.publish_cells([self.decomp.get_cell((8, 6, 9))], DEFAULT_LEAD_RGBA)
 
-    def publish(self):
-        # lead = []
-        # for i in range(10,19):
-        #      for j in range(5,19):
-        #          for k in range(10,19):
-        #              item = self.decomp.get_cell((i,j,k))
-        #              lead.append(item)
-        # self.viz.publish_cells(lead,(0.8,0.8,1.0,0.5))
-        lead = []
-        item = self.decomp.get_cell((8,6,9))
-        lead.append(item)
-        self.viz.publish_cells(lead,(0.8,0.8,1.0,0.5))
-
-
-    def test(self, start: State, goal: State):
-
-        # ycr edit
-        scene = moveit_commander.PlanningSceneInterface()
-        rospy.sleep(0.5)
-        #scene.remove_world_object("box")
-        #self.add_obj(scene, 'box', self.decomp.get_cell((8, 6, 8)).center_pos, (0.075, 0.075, 0.075), 'right_base_link')
-        #self.decomp.get_cell((8, 6, 8)).free_vol = 0.2
-        # ycr edit
-        
+    def test(self, start: State, goal: State) -> None:
+        self._create_scene_interface()
         start_cell = self.decomp.project(start)
         goal_cell = self.decomp.project(goal)
         lead = self.compute_lead(start_cell, goal_cell)
-        # self.viz.publish_cells(lead, (0.8, 0.8, 1.0, 0.5))
-        #self.viz.wait_for_gui("calc 0st lead: ok")
 
         self.viz.publish_state(self.decomp.fk(start))
         self.viz.publish_state(self.decomp.fk(goal))
-        test_cell = self.decomp.get_cell((16,9,16))
-        #self.viz.publish_cells([test_cell],(0.8,0.8,1.0,0.5))
-        
-        
-        # lead2 = [
-        #          self.decomp.get_cell((14, 10, 17)),
-        #          *lead[3:4],
-        #          self.decomp.get_cell((15, 10, 16))
-        #          ]
-        lead2 = lead[1:]
-        #self.decomp.get_cell((16, 7, 15))
-        self.viz.publish_cells(lead[1:],(0.8,0.8,1.0,0.5))
+        lead2 = list(lead[1:])
+        self.viz.publish_cells(lead2, DEFAULT_LEAD_RGBA)
         time.sleep(2)
-        #ead2 = lead
-        # for cell in lead2:
-        #     print(cell.center_pos)
-        #self.viz.publish_cells([start_cell],(0.8,0.8,1.0,0.5))
-        # for cell_le in lead:
-        #     lead3 = [cell_le]
-        #     self.viz.publish_cells(lead3,(0.8,0.8,1.0,0.5)) 
-        #     print(cell_le._rid)
-            #self.viz.wait_for_gui("calc 1st lead: ok")
-        #self.viz.publish_cells([goal_cell],(0.8,0.8,1.0,0.5))
-        #self.viz.publish_cells(lead2, (0.8, 0.8, 1.0, 0.5))
-        #self.viz.wait_for_gui("calc 1st lead: ok")
-        print("完成珊格可视化")
+        LOGGER.info("Grid visualization finished.")
+
         start_cell.start_set.add(start)
-        g = nx.Graph()
-        g.add_node(start)
-        g.add_node(goal)
-        #
-        states = []
-        for idx, cell in enumerate(lead2):
-            tmp = []
-            for _ in range(4):
-                s = self.decomp.sample_in_cell(cell)
-                while(s is None):
-                    s = self.decomp.sample_in_cell(cell)
-             #  if s is None:
-             #      continue
-             #   if idx == 3 and _ == 0:
-              #      continue
-                cell.start_set.add(s)
-                tmp.append(s)
-                g.add_node(s)
-                #print(s)
-                #print(self.decomp.fk(s))
-                #s_data = self.decomp.fk(s)
-                #print(s_data[0],' ',s_data[1],' ',s_data[2])
-                self.viz.publish_state(self.decomp.fk(s))
-            states.append(tmp)
+        graph = self._create_graph_with_terminals(start, goal)
+        states = self._sample_state_layers(lead2, 4, graph=graph)
         states[0].append(start)
         states[-1].append(goal)
-        #self.viz.wait_for_gui("sample along 1st lead: ok")
-        
-        import random
-        for i in range(1, len(states)):
-            ss1, ss2 = states[i - 1], states[i]
-            for s1 in ss1:
-                for s2 in ss2:
-                    p = random.random()
-                    validity = self.space.check_motion(s1, s2)#此处s1,s2是六维的
-                    if p<0.5:
-                        self.viz.publish_motion(self.decomp.fk, [s1, s2],
-                                            rgba=(0.2, 1, 0.2, 1),dim = 3)
-                    else:
-                        self.viz.publish_motion(self.decomp.fk, [s1, s2],
-                                            rgba=(1, 0.2, 0.2, 1) if not validity else (0.2, 1, 0.2, 1), dim=3)
-                    if validity:
-                        g.add_edge(s1, s2, w=self.space.distance(s1, s2))
-                        #s1_data = self.decomp.fk(s1)
-                        #for item in s2_data[:3]:
-                         #   print(item)
-            # break
+        self._connect_layers(graph, states, dim=3, randomize_valid_visuals=True)
+
         time.sleep(2)
-        self.viz.publish_cells(lead2[:2],(0.8,0.8,1.0,0.5))
-        self.viz.publish_cells(lead2[2:],(1,1,0,0.5))
-        for idx, cell in enumerate(lead2[2:]):
-            tmp = []
+        self.viz.publish_cells(lead2[:2], DEFAULT_LEAD_RGBA)
+        self.viz.publish_cells(lead2[2:], (1.0, 1.0, 0.0, 0.5))
+        for cell in lead2[2:]:
             for _ in range(30):
-                s = self.decomp.sample_in_cell(cell)
-                while(s is None):
-                    s = self.decomp.sample_in_cell(cell)
-             #  if s is None:
-             #      continue
-             #   if idx == 3 and _ == 0:
-              #      continue
-                # cell.start_set.add(s)
-                # tmp.append(s)
-                # g.add_node(s)
-                #print(s)
-                #print(self.decomp.fk(s))
-                #s_data = self.decomp.fk(s)
-                #print(s_data[0],' ',s_data[1],' ',s_data[2])
-                self.viz.publish_state(self.decomp.fk(s))
-        print("has path?", nx.has_path(g, start, goal))
-        #self.viz.wait_for_gui("check connecty: ok")
-     #  if not nx.has_path(g,start,goal):
-        print("start check all paths")
-        all_paths = list(nx.all_simple_paths(g, start, goal)) 
-        print("have checked ok")
-        path = nx.dijkstra_path(g, start, goal, weight='w')
-        # print(path)
-        for i in range(1, len(path)):
-            s1, s2 = path[i - 1], path[i]
-            self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-        """
-        for path in all_paths:
-            for i in range(1, len(path)):
-                s1, s2 = path[i - 1], path[i]
-                self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-                s_data = self.decomp.fk(path[i])
-                for item in s_data[:3]:
-                    print(item)
-        """
-        paths = optimal_path(g,start,goal,max_paths=5)
-        """
-        for i, (path, length) in enumerate(paths, start=1): 
-            for i in range(1, len(path)):
-                #s1, s2 = path[i - 1], path[i]
-                #self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-                s_data = self.decomp.fk(path[i])
-                for item in s_data[:3]:
-                    print(item)
-        """
-        """
-        with open('data.txt', 'a') as file:  
-            for i, (path, length) in enumerate(paths, start=1):  
-             for i in range(1, len(path)-1):  
-            # 假设 self.decomp.fk(path[i]) 返回一个包含至少三个元素的序列  
-                s_data = self.decomp.fk(path[i])  
-                for item in s_data[:3]:  
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                 file.write(str(item) + '\n') 
-        """
-        with open('data.txt', 'a') as file:  
-            for i, (path, length) in enumerate(paths, start=1):  
-             for i in range(1, len(path)-1):  
-            # 假设 self.decomp.fk(path[i]) 返回一个包含至少三个元素的序列  
-                #s_data = self.decomp.fk(path[i])  
-                s_data = path[i]
-                for item in s_data:  
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                 file.write(str(item) + '\n')        
-    def samAndeval_in_certain_cell(self, start: State, goal: State):
+                self.viz.publish_state(self.decomp.fk(self._sample_state(cell)))
 
-        # ycr edit
-        scene = moveit_commander.PlanningSceneInterface()
-        rospy.sleep(0.5)
-        #scene.remove_world_object("box")
-        #self.add_obj(scene, 'box', self.decomp.get_cell((8, 6, 8)).center_pos, (0.075, 0.075, 0.075), 'right_base_link')
-        #self.decomp.get_cell((8, 6, 8)).free_vol = 0.2
-        # ycr edit
-        
-        #start_cell = self.decomp.project(start)
+        LOGGER.info("Test graph has path: %s", nx.has_path(graph, start, goal))
+        LOGGER.info("Enumerating all simple paths for diagnostics.")
+        _ = list(nx.all_simple_paths(graph, start, goal))
+        LOGGER.info("Finished path enumeration.")
+        path = nx.dijkstra_path(graph, start, goal, weight="w")
+        for index in range(1, len(path)):
+            self.viz.publish_motion(self.decomp.fk, [path[index - 1], path[index]], rgba=(0.0, 0.0, 0.0, 1.0), dim=3, lw=0.01)
+        self._append_path_states(DEFAULT_PATH_EXPORT_FILE, optimal_path(graph, start, goal, max_paths=5))
+
+    def sample_and_eval_in_certain_cell(self, start: State, goal: State) -> None:
+        self._create_scene_interface()
         goal_cell = self.decomp.project(goal)
-        #lead = self.compute_lead(start_cell, goal_cell)
-        # self.viz.publish_cells(lead, (0.8, 0.8, 1.0, 0.5))
-        #self.viz.wait_for_gui("calc 0st lead: ok")
+        self.viz.publish_cells([goal_cell], DEFAULT_LEAD_RGBA)
 
-        #self.viz.publish_state(self.decomp.fk(start))
-        #self.viz.publish_state(self.decomp.fk(goal))
-      
-        """
-        lead2 = [self.decomp.get_cell((9, 5, 8)),
-                 self.decomp.get_cell((9, 5, 7)),
-                 *lead[2:]]
-        """
-        #lead2 = lead
-        #ead2 = lead
-        # for cell in lead2:
-        #     print(cell.center_pos)
+        graph = self._create_graph_with_terminals(start, goal)
+        target_vec = np.array([0.40662378, 0.35998749, 0.83968215])
+        point_before_rotate = np.array([-0.01, 0.07, 0.19])
+        target_position = np.array([0.6, 0.0, 0.65])
 
-        lead3 = [goal_cell]
-        self.viz.publish_cells(lead3,(0.8,0.8,1.0,0.5)) 
-        
-            #self.viz.wait_for_gui("calc 1st lead: ok")
-            
-        #self.viz.publish_cells(lead2, (0.8, 0.8, 1.0, 0.5))
-        #self.viz.wait_for_gui("calc 1st lead: ok")
+        def accept_state(_state: State, workspace_state: State) -> bool:
+            orientation = workspace_state.data_view[3:6]
+            position = workspace_state.data_view[:3]
+            rotation = R.from_euler("xyz", orientation, degrees=False)
+            rotated_vector = rotation.apply(np.array([0.0, 0.0, 1.0]))
+            if np.dot(rotated_vector, target_vec) < 0:
+                rotated_vector = -rotated_vector
+            _ = rotated_vector
+            end_position = rotation.apply(point_before_rotate) + np.array(position)
+            return np.linalg.norm(target_position - end_position) < 0.045
 
-        #start_cell.start_set.add(start)
-        g = nx.Graph()
-        g.add_node(start)
-        g.add_node(goal)
-        target_vec = np.array([0.40662378,0.35998749,0.83968215])
-        states = []
-        for idx, cell in enumerate(lead3):
-            tmp = []
-            while True:
-                s = self.decomp.sample_in_cell(cell)
-                while(s is None):
-                    s = self.decomp.sample_in_cell(cell)
-             #  if s is None:
-             #      continue
-             #   if idx == 3 and _ == 0:
-              #      continue
-                cell.start_set.add(s)
-                tmp.append(s)
-                orien_ = self.decomp.fk(s)
-                orien = orien_[3:6]
-                pos = orien_[:3]
-                point_befor_rotate = np.array([-0.01,0.07,0.19])
+        self._sample_graph_from_cell(goal_cell, graph, limit=2000, accept_state=accept_state)
+        self._log_graph_status(graph, "Sampled graph with")
+        self._filter_invalid_nodes(graph)
+        self._log_graph_status(graph, "Retained collision-free graph with")
+        self._append_joint_states(DEFAULT_SAMPLE_6D_EXPORT_FILE, graph.nodes())
+        self._append_workspace_samples(DEFAULT_SAMPLE_3D_EXPORT_FILE, graph)
 
-                rotation = R.from_euler('xyz', orien, degrees=False)
-                original_vector = np.array([0, 0, 1])
-                rotated_vector = rotation.apply(original_vector)
-                a = rotated_vector
-                b = target_vec
-                magnitude_a = np.linalg.norm(rotated_vector)
-                magnitude_b = np.linalg.norm(target_vec)
+    def samAndeval_in_certain_cell(self, start: State, goal: State) -> None:
+        """Backward-compatible wrapper for the legacy camelCase API."""
+        self.sample_and_eval_in_certain_cell(start, goal)
 
-                dot = np.dot(a, b)
-                if dot < 0:
-                    a = -a
-                    dot = np.dot(a, b)
-        # 计算cos(θ)
-                cos_theta = dot / (magnitude_a * magnitude_b)
+    def test_cell(self) -> None:
+        self._create_scene_interface()
+        self.viz.publish_cells([self.decomp.get_cell((0, 0, 0))], DEFAULT_LEAD_RGBA)
 
-                angle_radians = np.arccos(cos_theta)
-                weight = angle_radians / (0.5*np.pi)
-                point_after_rotate = rotation.apply(point_befor_rotate)
-                end_pos = point_after_rotate+np.array(pos)
-                
-                dis = np.array([0.6,0,0.65])- np.array(end_pos)
-                dis = np.linalg.norm(dis)
-                if dis<0.045:
-                    g.add_node(s)
-                    self.viz.publish_state(self.decomp.fk(s))
-                num_of_states = g.number_of_nodes()
-                if num_of_states==2000:break
-                #print(s)
-                #print(self.decomp.fk(s))
-                #s_data = self.decomp.fk(s)
-                #print(s_data[0],' ',s_data[1],' ',s_data[2])
-                
-            states.append(tmp)
-        #states[0].append(start)
-        #states[-1].append(goal)
-        #self.viz.wait_for_gui("sample along 1st lead: ok")
-        #
-        print('现在采样了{}个状态'.format(num_of_states))
-        unvalid_state = []
-        for item in g.nodes():
-            validity_of_state = self.space.check_validity(item)
-            if not validity_of_state:
-                unvalid_state.append(item)
-        g.remove_nodes_from(unvalid_state)
-        num_of_validity_node = g.number_of_nodes()
-        print('一共有{}个无碰撞状态'.format(num_of_validity_node))
-        """
-        # 计算可行边的数量
-        for node_1 in g.nodes():
-            for node_2 in g.nodes():
-                if node_1 == node_2:break
-                motion_validity =self.space.check_motion(node_1, node_2)
-                if motion_validity:
-                    g.add_edge(node_1, node_2, w=self.space.distance(node_1, node_2))
-        print('图中一共有{}条可行边连线'.format(g.number_of_edges()))
-        """
-        """
-        for i in range(1, len(states)):
-            ss1, ss2 = states[i - 1], states[i]
-            for s1 in ss1:
-                for s2 in ss2:
-                    validity = self.space.check_motion(s1, s2)#此处s1,s2是六维的
-                    self.viz.publish_motion(self.decomp.fk, [s1, s2],
-                                            rgba=(1, 0.2, 0.2, 1) if not validity else (0.2, 1, 0.2, 1), dim=3)
-                    if validity:
-                        g.add_edge(s1, s2, w=self.space.distance(s1, s2))
-                        #s1_data = self.decomp.fk(s1)
-                        #for item in s2_data[:3]:
-                         #   print(item)
-        """
-            # break
-        #print("has path?", nx.has_path(g, start, goal))
-        #self.viz.wait_for_gui("check connecty: ok")
-     #  if not nx.has_path(g,start,goal):
-        #print("start check all paths")
-        #all_paths = list(nx.all_simple_paths(g, start, goal)) 
-        #print("have checked ok")
-        #path = nx.dijkstra_path(g, start, goal, weight='w')
-        # print(path)
-        """
-        for i in range(1, len(path)):
-            s1, s2 = path[i - 1], path[i]
-            self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-        
-        for path in all_paths:
-            for i in range(1, len(path)):
-                s1, s2 = path[i - 1], path[i]
-                self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-                s_data = self.decomp.fk(path[i])
-                for item in s_data[:3]:
-                    print(item)
-        """
-        #paths = optimal_path(g,start,goal,max_paths=5)
-        """
-        for i, (path, length) in enumerate(paths, start=1): 
-            for i in range(1, len(path)):
-                #s1, s2 = path[i - 1], path[i]
-                #self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-                s_data = self.decomp.fk(path[i])
-                for item in s_data[:3]:
-                    print(item)
-        """
-        """
-        with open('data.txt', 'a') as file:  
-            for i, (path, length) in enumerate(paths, start=1):  
-             for i in range(1, len(path)-1):  
-            # 假设 self.decomp.fk(path[i]) 返回一个包含至少三个元素的序列  
-                s_data = self.decomp.fk(path[i])  
-                for item in s_data[:3]:  
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                 file.write(str(item) + '\n') 
-        """
-        with open('sample_6D_state_data.txt', 'a') as file: 
-            for node in g.nodes():
-                
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-             file.write(str(node._data) + '\n')    
-        with open('sample_3D_state_data.txt', 'a') as file_1: 
-            for node in g.nodes():
-                s_data = self.decomp.fk(node)
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                s_data =  s_data[:3]  
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                file_1.write(str(s_data) + '\n')
-    def test_cell(self):
-        scene = moveit_commander.PlanningSceneInterface()
-        rospy.sleep(0.5)
+    def collect_data(self, start: State, goal: State) -> None:
+        self._create_scene_interface()
+        target_cell = self.decomp.get_cell((0, 0, 0))
+        self.viz.publish_cells([target_cell], DEFAULT_LEAD_RGBA)
 
-        lead = []
-        # item = self.decomp.get_cell((8,6,9))
-        item = self.decomp.get_cell((0,0,0))
-        lead.append(item)
-        self.viz.publish_cells(lead,(0.8,0.8,1.0,0.5))
-    def collect_data(self, start: State, goal: State):
+        graph = self._create_graph_with_terminals(start, goal)
+        self._sample_graph_from_cell(target_cell, graph, limit=4000)
+        self._log_graph_status(graph, "Sampled graph with")
+        self._filter_invalid_nodes(graph)
+        self._log_graph_status(graph, "Retained collision-free graph with")
 
-        scene = moveit_commander.PlanningSceneInterface()
-        rospy.sleep(0.5)
+        edge_count = self._fully_connect_graph(graph)
+        LOGGER.info("Constructed %d collision-free edges.", edge_count)
+        self._append_joint_states(DEFAULT_SAMPLE_6D_EXPORT_FILE, graph.nodes())
+        self._append_workspace_samples(DEFAULT_SAMPLE_3D_EXPORT_FILE, graph, include_normalized_degree=True)
 
-        lead = []
-        # item = self.decomp.get_cell((8,6,9))
-        item = self.decomp.get_cell((0,0,0))
-        lead.append(item)
-        self.viz.publish_cells(lead,(0.8,0.8,1.0,0.5))
+        if graph.number_of_nodes() > 0:
+            total_degree = sum(graph.degree(node) for node in graph.nodes())
+            LOGGER.info("Average degree per node: %s", total_degree / float(graph.number_of_nodes()))
 
-        g = nx.Graph()
-        g.add_node(start)
-        g.add_node(goal)
-        states = []
-        for idx, cell in enumerate(lead):
-            tmp = []
-            while True:
-                s = self.decomp.sample_in_cell(cell)
-                while(s is None):
-                    s = self.decomp.sample_in_cell(cell)
-             #  if s is None:
-             #      continue
-             #   if idx == 3 and _ == 0:
-              #      continue
-                cell.start_set.add(s)
-                tmp.append(s)
-                orien_ = self.decomp.fk(s)
-
-
-                
-                g.add_node(s)
-                self.viz.publish_state(self.decomp.fk(s))
-                num_of_states = g.number_of_nodes()
-                if num_of_states==4000:break
-                #print(s)
-                #print(self.decomp.fk(s))
-                #s_data = self.decomp.fk(s)
-                #print(s_data[0],' ',s_data[1],' ',s_data[2])
-                
-            states.append(tmp)
-        #states[0].append(start)
-        #states[-1].append(goal)
-        #self.viz.wait_for_gui("sample along 1st lead: ok")
-        #
-        print('现在采样了{}个状态'.format(num_of_states))
-        unvalid_state = []
-        for item in g.nodes():
-            validity_of_state = self.space.check_validity(item)
-            if not validity_of_state:
-                unvalid_state.append(item)
-        g.remove_nodes_from(unvalid_state)
-        num_of_validity_node = g.number_of_nodes()
-        print('一共有{}个无碰撞状态'.format(num_of_validity_node))
-        j =0
-        
-        # 计算可行边的数量
-        for node_1 in g.nodes():
-            for node_2 in g.nodes():
-                if node_1 == node_2:break
-                motion_validity =self.space.check_motion(node_1, node_2)
-                if motion_validity:
-                    g.add_edge(node_1, node_2, w=self.space.distance(node_1, node_2))
-                j=j+1
-                
-        print('图中一共有{}条可行边连线'.format(g.number_of_edges()))
-
-        
-        """
-        for i in range(1, len(states)):
-            ss1, ss2 = states[i - 1], states[i]
-            for s1 in ss1:
-                for s2 in ss2:
-                    validity = self.space.check_motion(s1, s2)#此处s1,s2是六维的
-                    self.viz.publish_motion(self.decomp.fk, [s1, s2],
-                                            rgba=(1, 0.2, 0.2, 1) if not validity else (0.2, 1, 0.2, 1), dim=3)
-                    if validity:
-                        g.add_edge(s1, s2, w=self.space.distance(s1, s2))
-                        #s1_data = self.decomp.fk(s1)
-                        #for item in s2_data[:3]:
-                         #   print(item)
-        """
-            # break
-        #print("has path?", nx.has_path(g, start, goal))
-        #self.viz.wait_for_gui("check connecty: ok")
-     #  if not nx.has_path(g,start,goal):
-        #print("start check all paths")
-        #all_paths = list(nx.all_simple_paths(g, start, goal)) 
-        #print("have checked ok")
-        #path = nx.dijkstra_path(g, start, goal, weight='w')
-        # print(path)
-        """
-        for i in range(1, len(path)):
-            s1, s2 = path[i - 1], path[i]
-            self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-        
-        for path in all_paths:
-            for i in range(1, len(path)):
-                s1, s2 = path[i - 1], path[i]
-                self.viz.publish_motion(self.decomp.fk, [s1, s2], rgba=(0, 0, 0, 1), dim=3, lw=0.01)
-                s_data = self.decomp.fk(path[i])
-                for item in s_data[:3]:
-                    print(item)
-        """
-        #paths = optimal_path(g,start,goal,max_paths=5)
-
-
-        with open('sample_6D_state_data.txt', 'a') as file: 
-            for node in g.nodes():
-                
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                file.write(str(node._data) + '\n')    
-                sum_edge = 0
-        sum_edge = 0
-
-        
-        with open('sample_3D_state_data.txt', 'a') as file_1: 
-            
-            for node in g.nodes():
-                s_data = self.decomp.fk(node)
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                s_data =  s_data[:3]
-                w = g.degree(node)
-                sum_edge+=w 
-
-                w = w/(num_of_validity_node-1)
-                s_data = [s_data,w]
-                # 将 item 转换为字符串（如果它还不是字符串的话），然后写入文件，并添加一个换行符  
-                file_1.write(str(s_data) + '\n')   
-                
-            print("平均每个节点的边数：", sum_edge/num_of_validity_node)
-
-
-    def sample_gmm_in_certain_cell(self, start: State, goal: State, ex_num,mode = "both",finetuning = False,step_size=1):
-
-        lead = []
-        # item = self.decomp.get_cell((8,6,9))
-        item = self.decomp.get_cell((0,0,0))
-        lead.append(item)
-        # low = [0.49, 0, 0.50]
-        # up = [0.7, 0.16, 0.66]
-        scene = moveit_commander.PlanningSceneInterface()
-        rospy.sleep(0.5)
-        # goal_cell = self.decomp.project(goal)
-        # print("rid:",goal_cell._rid)
-        # lead3 = [goal_cell]
-        self.viz.publish_cells(lead,(0.8,0.8,1.0,0.5)) 
+    def sample_gmm_in_certain_cell(
+        self,
+        start: State,
+        goal: State,
+        ex_num: int,
+        mode: str = "both",
+        finetuning: bool = False,
+        step_size: int = 1,
+    ) -> None:
+        target_cell = self.decomp.get_cell((0, 0, 0))
+        self._create_scene_interface()
+        self.viz.publish_cells([target_cell], DEFAULT_LEAD_RGBA)
         time.sleep(5)
-        g = nx.Graph()
-        g.add_node(start)
-        g.add_node(goal)
-        states = []
-        points = []
-        num_point = 100
-        point_now = 0
-        for idx, cell in enumerate(lead):
-            tmp = []
-            while point_now<100:
-                s = self.sample_state_with_ws_and_JS(ex_num,mode,finetuning=finetuning,step_size=step_size)
-                while(s is None):
-                    s = self.sample_state_with_ws_and_JS(ex_num,mode,finetuning=finetuning,step_size=step_size)
-                s_3 = self.decomp.fk(s)
-                is_in_scene = True
-                if is_in_scene:
-                    tmp.append(s)
-                    g.add_node(s)
-                    self.viz.publish_state(self.decomp.fk(s))
-                    point_now += 1
 
-            states.append(tmp)
-        # 图g中都是有逆解的，且在指定珊格内的点，以六维数据形式存在，即关节角
-        print('现在采样了{}个状态'.format(num_point))
-        unvalid_state = []
-        for item in g.nodes():
-            validity_of_state = self.space.check_validity(item)
-            if not validity_of_state:
-                unvalid_state.append(item)
-        g.remove_nodes_from(unvalid_state)
-        num_of_validity_node = g.number_of_nodes()
-        print('一共有{}个无碰撞状态'.format(num_of_validity_node))
-        for node_1 in g.nodes():
-            for node_2 in g.nodes():
-                if node_1 == node_2:break
-                motion_validity =self.space.check_motion(node_1, node_2)
-                if motion_validity:
-                    g.add_edge(node_1, node_2, w=self.space.distance(node_1, node_2))
-        print('图中一共有{}条可行边连线'.format(g.number_of_edges()))
-        sum_edge = 0
-        for node in g.nodes():
-            w = g.degree(node)
-            sum_edge+=w 
-        print("平均每个节点的边数：", sum_edge/num_of_validity_node)
-    def sample_state_with_ws_and_JS(self,ex_num,mode = "both",finetuning = False,step_size =1):
-    # 整体采样函数，整合上方工作空间采样和关节空间采样并作逆解返回state对象
-        # seed = State(*np.array(sample_6d(),dtype = float))  # 获得关节空间采样结果
-        seed = State(*np.random.uniform(    #均匀采样
-        (-np.pi, -2.27, -np.pi, -2.3, -np.pi, -2.26, -np.pi),
-        (np.pi, 2.27, np.pi, 2.3, np.pi, 2.26, np.pi)
-            )) 
-        pos, orien = sample_with_weightGMM(ex_num=ex_num,finetuing=finetuning,step_size=step_size)
-        x_min, x_max = 0.3137,0.4803
-        y_min, y_max = 0, 1/6
-        z_min, z_max = 0.5, 0.666
+        graph = self._create_graph_with_terminals(start, goal)
+        while graph.number_of_nodes() < 100:
+            state = self.sample_state_with_ws_and_JS(ex_num, mode, finetuning=finetuning, step_size=step_size)
+            if state is None:
+                continue
+            graph.add_node(state)
+            self.viz.publish_state(self.decomp.fk(state))
 
-        # 生成一个随机点
-        random_pos = np.array([
-            np.random.uniform(x_min, x_max),
-            np.random.uniform(y_min, y_max),
-            np.random.uniform(z_min, z_max)
-        ])
-        orien = [orien[1],orien[2],orien[3],orien[0]]
-        euler = tf.transformations.euler_from_quaternion(orien)
-        data_1 = np.array([0,0,0],dtype = float)
+        self._log_graph_status(graph, "Sampled graph with")
+        self._filter_invalid_nodes(graph)
+        self._log_graph_status(graph, "Retained collision-free graph with")
+
+        edge_count = self._fully_connect_graph(graph)
+        LOGGER.info("Constructed %d collision-free edges.", edge_count)
+        if graph.number_of_nodes() > 0:
+            total_degree = sum(graph.degree(node) for node in graph.nodes())
+            LOGGER.info("Average degree per node: %s", total_degree / float(graph.number_of_nodes()))
+
+    def sample_state_with_ws_and_JS(
+        self,
+        ex_num: int,
+        mode: str = "both",
+        finetuning: bool = False,
+        step_size: int = 1,
+    ) -> Optional[State]:
+        seed = State(
+            *np.random.uniform(
+                (-np.pi, -2.27, -np.pi, -2.3, -np.pi, -2.26, -np.pi),
+                (np.pi, 2.27, np.pi, 2.3, np.pi, 2.26, np.pi),
+            )
+        )
+
+        pos, orientation_quaternion = sample_with_weight_gmm(
+            ex_num=ex_num,
+            finetuning=finetuning,
+            step_size=step_size,
+        )
+        random_pos = np.array(
+            [
+                np.random.uniform(0.3137, 0.4803),
+                np.random.uniform(0.0, 1.0 / 6.0),
+                np.random.uniform(0.5, 0.666),
+            ]
+        )
+        quaternion_xyzw = [
+            orientation_quaternion[1],
+            orientation_quaternion[2],
+            orientation_quaternion[3],
+            orientation_quaternion[0],
+        ]
+        euler = tf.transformations.euler_from_quaternion(quaternion_xyzw)
+        zeros = np.array([0.0, 0.0, 0.0], dtype=float)
+
         if mode == "pos":
-            data_final = np.hstack((pos,data_1))
-            pt = State(*data_final)
-            pt.data_view[3:] = self.decomp.fk(seed).data_view[3:]
-        if mode == "both":
-            data_final = np.hstack((pos,data_1))
-            pt = State(*data_final)
-            pt.data_view[3:] = euler
-        if mode == "orien":
-            data_final = np.hstack((random_pos,data_1))
-            pt = State(*data_final)
-            pt.data_view[3:] = euler                       
-        # pt.data_view[3:] = self.decomp.fk(seed).data_view[3:]
-        return self.decomp._moveit_ik(pt, seed) 
-def optimal_path(g,start:State,goal:State,max_paths):   #返回一个字典，字典包含了该路图下所有可行路径中路径最短的前max_paths条
+            workspace_state = State(*np.hstack((pos, zeros)))
+            workspace_state.data_view[3:] = self.decomp.fk(seed).data_view[3:]
+        elif mode == "orien":
+            workspace_state = State(*np.hstack((random_pos, zeros)))
+            workspace_state.data_view[3:] = euler
+        else:
+            workspace_state = State(*np.hstack((pos, zeros)))
+            workspace_state.data_view[3:] = euler
+
+        return self.decomp.moveit_ik(workspace_state, seed)
+
+
+def optimal_path(g: nx.Graph, start: State, goal: State, max_paths: int) -> Sequence[Tuple[Sequence[State], float]]:
+    """Return the shortest ``max_paths`` simple paths between ``start`` and ``goal``."""
     paths_with_lengths = []
-    all_paths = list(nx.all_simple_paths(g, start, goal))  
-    path_lengths = []  
-    for path in all_paths:  
-        # 使用生成器表达式和sum函数计算总权重  
-        total_weight = sum(g[u][v]['w'] for u, v in zip(path[:-1], path[1:]))  
-        paths_with_lengths.append((path, total_weight))  
-    sorted_paths_with_lengths = sorted(paths_with_lengths, key=lambda x: x[1])
-    shortest_paths_with_lengths = sorted_paths_with_lengths[:max_paths] 
-    return shortest_paths_with_lengths
-def sample_in_pos_gmm():
-    # 定义三维高斯分布的均值向量  
-    mog_means = [
-    np.array([ 0.07046908,  1.30692769, -1.18496925]),
-    np.array([-0.06943756 , 1.20132714, -0.92336193]),
-    np.array([-0.05707147  ,1.04293068, -0.90826982])
-    ]   
-    mog_covariances = [
-    [[ 2.67495390e-05,  5.77148928e-05,  5.05309612e-05],
-    [ 5.77148928e-05 , 1.94071205e-04 , 5.29161277e-05],
-    [ 5.05309612e-05 , 5.29161277e-05 , 1.57318012e-04]],
+    for path in nx.all_simple_paths(g, start, goal):
+        total_weight = sum(g[u][v]["w"] for u, v in zip(path[:-1], path[1:]))
+        paths_with_lengths.append((path, total_weight))
+    return sorted(paths_with_lengths, key=lambda item: item[1])[:max_paths]
 
-    [[ 6.92769352e-03, -3.47953747e-03,  8.55234075e-03],
-    [-3.47953747e-03 , 9.07716398e-03 ,-1.30317239e-02],
-    [ 8.55234075e-03, -1.30317239e-02 , 4.31910729e-02]],
 
-    [[ 5.43322176e-03, -1.48590041e-03 , 4.76881060e-03],
-    [-1.48590041e-03 , 1.84514037e-03 ,-3.60992673e-03],
-    [ 4.76881060e-03 ,-3.60992673e-03 , 8.54771512e-03]]
-    ]
- 
-    mog_weights = [0.01023507, 0.89563609, 0.09412884] # 每个分量的权重
- 
-# 根据权重随机选择一个高斯分量
-    chosen_component = np.random.choice(len(mog_means), p=mog_weights)
- 
-# 从选择的高斯分量中采样一个点
-    sampled_point = multivariate_normal.rvs(mean=mog_means[chosen_component], cov=mog_covariances[chosen_component])
 
-    return sampled_point
-def is_in_current_scene(low,up,s:State):
-    is_in_scene = 1
-    x = s._data[0]
-    y = s._data[1]
-    z = s._data[2]
-    if x > up[0] or x < low[0]: is_in_scene = 0
-    if y > up[1] or y < low[1]: is_in_scene = 0
-    if z > up[2] or z < low[2]: is_in_scene = 0
-    return is_in_scene
-def sample_in_orien_gmm():
-        # 定义三维高斯分布的均值向量  
-    mog_means = [
-    np.array([1.14554359, 3.76069647, 2.45144533]),  # 第一个分量的均值
-    np.array([0.88711158, 3.78716541, 2.25876497]),  # 第二个分量的均值
-    np.array([1.5516782 , 3.7547973 ,2.70434327])  # 第三个分量的均值
-    ]   
- 
-    mog_covariances = [
-    [[ 4.33300035e-02, -4.99436249e-04,  5.93312265e-03],
-    [-4.99436249e-04,  2.79245882e-05, -3.08262154e-04],
-    [ 5.93312265e-03, -3.08262154e-04,  3.63925947e-03]],
+WORKSPACE_GMM_POTENTIAL_DIRECTIONS = (
+    np.array([0.01397475, -0.0904236, -0.00941188]),
+    np.array([0.33226185, -0.23796437, 0.19280717]),
+    np.array([0.17049813, 0.04186867, 0.07350064]),
+)
 
-    [[ 3.65603231e-02, -5.29988207e-04 , 2.88230165e-03],
-    [-5.29988207e-04 , 1.12677079e-04 ,-5.81926904e-04],
-    [ 2.88230165e-03 ,-5.81926904e-04,  3.05243854e-03]],
 
-    [[ 3.83234076e-02,  5.75920643e-04 , 1.23939256e-02],
-    [ 5.75920643e-04 , 2.19415744e-05 , 3.68573523e-04],
-    [ 1.23939256e-02 , 3.68573523e-04 , 7.79992995e-03]]      
-    ]
- 
-    mog_weights = [0.3794022, 0.3821996, 0.2383982]  # 每个分量的权重
- 
-# 根据权重随机选择一个高斯分量
-    chosen_component = np.random.choice(len(mog_means), p=mog_weights)
- 
-# 从选择的高斯分量中采样一个点
-    sampled_point = multivariate_normal.rvs(mean=mog_means[chosen_component], cov=mog_covariances[chosen_component])
-    return sampled_point
-def sample_in_work_space_with_EM():
-    mog_means = [
-    np.array([0.53115991, 0.09719978, 0.53595373]),  # 第一个分量的均值
-    np.array([0.56462763, 0.12902873, 0.57918368]),  # 第二个分量的均值
-    np.array([0.52360095, 0.02124487, 0.52451799])  # 第三个分量的均值
-    ]   
+def _sample_gaussian_mixture(spec: Dict[str, Any]) -> np.ndarray:
+    """Draw a sample from a Gaussian mixture specification."""
+    component_index = np.random.choice(len(spec["means"]), p=spec["weights"])
+    return multivariate_normal.rvs(mean=spec["means"][component_index], cov=spec["covariances"][component_index])
 
-    mog_covariances = [
-    [[ 5.40573326e-04 ,-6.07175424e-05, -1.03586221e-04],
-    [-6.07175424e-05,  1.68721713e-03,  1.46484710e-04],
-    [-1.03586221e-04,  1.46484710e-04,  5.81219721e-04]],
 
-    [[ 1.67873699e-03,  4.15616332e-04, -1.33519882e-03],
-    [ 4.15616332e-04,  7.39383912e-04, -5.19539469e-05],
-    [-1.33519882e-03, -5.19539469e-05,  2.11186146e-03]],
+def sample_in_pos_gmm() -> np.ndarray:
+    """Sample a 3D position from the legacy position GMM."""
+    return _sample_gaussian_mixture(POSITION_GMM)
 
-    [[ 1.40624904e-05,  1.56990287e-06, -3.00487976e-06],
-    [ 1.56990287e-06,  1.48773246e-06, -5.72264670e-07],
-    [-3.00487976e-06, -5.72264670e-07,  2.88935451e-06]]      
-    ]
- 
-    mog_weights = [0.40610975, 0.59057089, 0.00331936]  # 每个分量的权重
 
-# 根据权重随机选择一个高斯分量
-    chosen_component = np.random.choice(len(mog_means), p=mog_weights)
- 
-# 从选择的高斯分量中采样一个点
-    sampled_point = multivariate_normal.rvs(mean=mog_means[chosen_component], cov=mog_covariances[chosen_component])
-    return sampled_point
-def sample_in_work_space_with_EM_and_potential():
-    mog_means = [
-    np.array([0.53115991, 0.09719978, 0.53595373]),  # 第一个分量的均值
-    np.array([0.56462763, 0.12902873, 0.57918368]),  # 第二个分量的均值
-    np.array([0.52360095, 0.02124487, 0.52451799])  # 第三个分量的均值
-    ] 
-    f1 = np.array([ 0.01397475, -0.0904236,  -0.00941188])
-    f2 = np.array([ 0.33226185, -0.23796437,  0.19280717])
-    f3 = np.array([0.17049813, 0.04186867, 0.07350064])
-    f1 = f1 / np.linalg.norm(f1)
-    f2 = f2 / np.linalg.norm(f2)
-    f3 = f3 / np.linalg.norm(f3)
-    delt_t = -0.04
-    mog_means[0] += f1 * delt_t 
-    mog_means[1] += f2 * delt_t
-    mog_means[2] += f3 * delt_t
-    mog_covariances = [
-    [[ 5.40573326e-04 ,-6.07175424e-05, -1.03586221e-04],
-    [-6.07175424e-05,  1.68721713e-03,  1.46484710e-04],
-    [-1.03586221e-04,  1.46484710e-04,  5.81219721e-04]],
+def is_in_current_scene(low: Sequence[float], up: Sequence[float], s: State) -> int:
+    """Return 1 when the state's position lies inside the axis-aligned bounds."""
+    position = s.data_view[:3]
+    if np.any(position > np.asarray(up)) or np.any(position < np.asarray(low)):
+        return 0
+    return 1
 
-    [[ 1.67873699e-03,  4.15616332e-04, -1.33519882e-03],
-    [ 4.15616332e-04,  7.39383912e-04, -5.19539469e-05],
-    [-1.33519882e-03, -5.19539469e-05,  2.11186146e-03]],
 
-    [[ 1.40624904e-05,  1.56990287e-06, -3.00487976e-06],
-    [ 1.56990287e-06,  1.48773246e-06, -5.72264670e-07],
-    [-3.00487976e-06, -5.72264670e-07,  2.88935451e-06]]      
-    ]
- 
-    mog_weights = [0.40610975, 0.59057089, 0.00331936]  # 每个分量的权重
+def sample_in_orien_gmm() -> np.ndarray:
+    """Sample an orientation expressed in XYZ Euler angles."""
+    return _sample_gaussian_mixture(ORIENTATION_GMM)
 
-# 根据权重随机选择一个高斯分量
-    chosen_component = np.random.choice(len(mog_means), p=mog_weights)
- 
-# 从选择的高斯分量中采样一个点
-    sampled_point = multivariate_normal.rvs(mean=mog_means[chosen_component], cov=mog_covariances[chosen_component])
-    return sampled_point
-def sample_6d():
-    # 拼接两个三关节采样结果得道六维度数据
-    pos = np.array(sample_in_pos_gmm())
-    orien = np.array(sample_in_orien_gmm())
-    point = np.hstack((pos,orien))
-    point = np.array(point,dtype = float)
-    return point
-def sample_with_weightGMM(ex_num,finetuing = False,step_size =1):
-    import os
-    if finetuing:
-        with open("./gmm/pos/pos_finetuning/step_size{}cm/gmm_{}%_pos_finetuning.pkl".format(step_size,ex_num), "rb") as f:
-            gmm_pos = pickle.load(f)
+
+def sample_in_work_space_with_EM() -> np.ndarray:
+    """Sample a workspace position from the EM-estimated GMM."""
+    return _sample_gaussian_mixture(WORKSPACE_GMM)
+
+
+def sample_in_work_space_with_EM_and_potential() -> np.ndarray:
+    """Sample a workspace position from the EM GMM with directional bias."""
+    adjusted_means = []
+    for mean, direction in zip(WORKSPACE_GMM["means"], WORKSPACE_GMM_POTENTIAL_DIRECTIONS):
+        adjusted_means.append(mean + direction / np.linalg.norm(direction) * -0.04)
+    spec = {
+        "means": tuple(adjusted_means),
+        "covariances": WORKSPACE_GMM["covariances"],
+        "weights": WORKSPACE_GMM["weights"],
+    }
+    return _sample_gaussian_mixture(spec)
+
+
+def sample_6d() -> np.ndarray:
+    """Sample a 6D workspace state composed of position and orientation."""
+    return np.array(np.hstack((sample_in_pos_gmm(), sample_in_orien_gmm())), dtype=float)
+
+
+def sample_with_weight_gmm(ex_num: int, finetuning: bool = False, step_size: int = 1) -> Tuple[np.ndarray, np.ndarray]:
+    """Sample position and orientation from the pickled weighted GMM models."""
+    if finetuning:
+        pos_path = GMM_DIR / "pos" / "pos_finetuning" / "step_size{0}cm".format(step_size) / "gmm_{0}%_pos_finetuning.pkl".format(ex_num)
     else:
-        with open("./gmm/pos/gmm_{}%_pos.pkl".format(ex_num), "rb") as f:
-            gmm_pos = pickle.load(f)
-    with open("./gmm/orien/gmm_{}%_orien.pkl".format(ex_num), "rb") as f:
-        gmm_orien = pickle.load(f)
-    pos = gmm_pos.sample(1)[0]
-    v_orien = gmm_orien.sample(1)
-    q_orien = np.array([exp_map(v, gmm_orien.q_ref) for v in v_orien])[0]
-    return pos, q_orien
+        pos_path = GMM_DIR / "pos" / "gmm_{0}%_pos.pkl".format(ex_num)
+    orien_path = GMM_DIR / "orien" / "gmm_{0}%_orien.pkl".format(ex_num)
 
-    
+    with pos_path.open("rb") as handle:
+        gmm_pos = pickle.load(handle)
+    with orien_path.open("rb") as handle:
+        gmm_orien = pickle.load(handle)
+
+    pos = gmm_pos.sample(1)[0]
+    tangent_orientation = gmm_orien.sample(1)
+    quaternion_orientation = np.array([exp_map(vector, gmm_orien.q_ref) for vector in tangent_orientation])[0]
+    return pos, quaternion_orientation
+
+
+def sample_with_weightGMM(
+    ex_num: int,
+    finetuing: bool = False,
+    step_size: int = 1,
+    finetuning: Optional[bool] = None,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Backward-compatible wrapper around :func:`sample_with_weight_gmm`."""
+    resolved_finetuning = finetuing if finetuning is None else finetuning
+    return sample_with_weight_gmm(ex_num=ex_num, finetuning=resolved_finetuning, step_size=step_size)
+
+
 class Viz:
-    def __init__(self):
-        self.cells_pub = rospy.Publisher("/visualization_decomposition", visualization_msgs.msg.MarkerArray, queue_size=1,
-                                         latch=True)
-        self.gui_sub = rospy.Subscriber('/rviz_visual_tools_gui', sensor_msgs.msg.Joy, callback=self._joy_callback)
+    """RViz/MoveIt visualization wrapper used by the planner demos."""
+
+    def __init__(self) -> None:
+        self.cells_pub = rospy.Publisher("/visualization_decomposition", visualization_msgs.msg.MarkerArray, queue_size=1, latch=True)
+        self.gui_sub = rospy.Subscriber("/rviz_visual_tools_gui", sensor_msgs.msg.Joy, callback=self._joy_callback)
         self.con = threading.Condition()
         self.button_status = []
-
-        self.clear_ids = []
+        self.clear_ids = set()
         self.cur_id = 100
-
-        self.trajectory_pub = rospy.Publisher('move_group/display_planned_path', moveit_msgs.msg.DisplayTrajectory, queue_size=1)
-
+        self.trajectory_pub = rospy.Publisher("move_group/display_planned_path", moveit_msgs.msg.DisplayTrajectory, queue_size=1)
         self.config = {
-            'base_name': 'base_link',
-            'joint_names': [f'joint{i}' for i in range(1, 8)],
-            # 'base_name': 'base_link',
-            # 'joint_names': [f'joint_{i}' for i in range(1, 4)]
+            "base_name": "base_link",
+            "joint_names": list(DEFAULT_JOINT_NAMES),
+            "model_id": "rm_75_description",
         }
 
     def _gen_marker_id(self) -> int:
         self.cur_id += 1
         return self.cur_id
 
-    def _joy_callback(self, msg: sensor_msgs.msg.Joy):
+    def _joy_callback(self, msg: sensor_msgs.msg.Joy) -> None:
         with self.con:
             self.button_status = deepcopy(msg.buttons)
             self.con.notify_all()
 
-    def wait_for_gui(self, txt="wait_for_gui..."):
+    def wait_for_gui(self, txt: str = "wait_for_gui...") -> None:
         rospy.loginfo(txt)
         with self.con:
-            while True:
-                while len(self.button_status) == 0:
+            while not rospy.is_shutdown():
+                while len(self.button_status) == 0 and not rospy.is_shutdown():
                     self.con.wait()
-                if self.button_status[1] == 1:
+                if rospy.is_shutdown():
+                    return
+                if len(self.button_status) > 4 and self.button_status[1] == 1:
                     self.button_status = []
                     rospy.loginfo("recv continue cmd")
-                    break
-                elif self.button_status[4] == 1:
-                    rospy.loginfo("recv stop cmd, exec exit(0)")
-                    exit(0)
-                else:
-                    rospy.loginfo("Unknown cmd, try again")
-                    self.button_status = []
-                    continue
+                    return
+                if len(self.button_status) > 4 and self.button_status[4] == 1:
+                    rospy.loginfo("recv stop cmd, exiting")
+                    raise SystemExit(0)
+                rospy.loginfo("Unknown cmd, try again")
+                self.button_status = []
 
-    def clear_all(self):
+    def clear_all(self) -> None:
         msg_array = visualization_msgs.msg.MarkerArray()
-        for ns, _id in self.clear_ids:
-            msg = visualization_msgs.msg.Marker()
-            msg.id = _id
-            msg.ns = ns
-            msg.action = msg.DELETEALL
-            msg_array.markers.append(msg)
+        marker = visualization_msgs.msg.Marker()
+        marker.action = visualization_msgs.msg.Marker.DELETEALL
+        msg_array.markers.append(marker)
         self.cells_pub.publish(msg_array)
+        self.clear_ids.clear()
 
-    def publish_trajectory(self, states: Sequence[State]):
+    def publish_trajectory(self, states: Sequence[State]) -> None:
+        if not states:
+            return
+
         msg = moveit_msgs.msg.DisplayTrajectory()
-        msg.model_id = "rm_75_description"
-        traj_msg = moveit_msgs.msg.RobotTrajectory()
-        traj_msg.joint_trajectory.joint_names = self.config['joint_names']
-        for idx, s in enumerate(states):
-            pt = trajectory_msgs.msg.JointTrajectoryPoint()
-            pt.positions = s.data_view.tolist()
-            pt.time_from_start = rospy.Time.from_sec(idx)
-            traj_msg.joint_trajectory.points.append(pt)
-        msg.trajectory.append(traj_msg)
-        msg.trajectory_start.joint_state.name = self.config['joint_names']
+        msg.model_id = self.config["model_id"]
+        trajectory = moveit_msgs.msg.RobotTrajectory()
+        trajectory.joint_trajectory.joint_names = self.config["joint_names"]
+        for idx, state in enumerate(states):
+            point = trajectory_msgs.msg.JointTrajectoryPoint()
+            point.positions = state.data_view.tolist()
+            point.time_from_start = rospy.Time.from_sec(idx)
+            trajectory.joint_trajectory.points.append(point)
+        msg.trajectory.append(trajectory)
+        msg.trajectory_start.joint_state.name = self.config["joint_names"]
         msg.trajectory_start.joint_state.position = states[0].data_view.tolist()
         self.trajectory_pub.publish(msg)
 
-    def publish_cells(self, cells: Sequence[Cell], rgba: Tuple):
-        ns = "lead"
+    def publish_cells(self, cells: Sequence[Cell], rgba: Tuple[float, float, float, float]) -> None:
+        if not cells:
+            return
+
         interval = cells[0].ws.ub - cells[0].ws.lb
         msg_array = visualization_msgs.msg.MarkerArray()
-        msg = visualization_msgs.msg.Marker()
-        msg.header.frame_id = self.config['base_name']
-        msg.ns = ns
-        msg.id = 1  # self._gen_marker_id()
-        self.clear_ids.append((ns, msg.id))
-        msg.type = msg.CUBE_LIST
-        msg.action = msg.ADD
-        msg.scale.x = interval[0]
-        msg.scale.y = interval[1]
-        msg.scale.z = interval[2] if cells[0].dim > 2 else 0.1
-        msg.pose.position.z = 0.0
-        msg.pose.orientation.w = 1.0
-        color = std_msgs.msg.ColorRGBA(*rgba)
-        msg.color = color
-        msg.lifetime = rospy.Duration.from_sec(0.0)
 
+        marker = visualization_msgs.msg.Marker()
+        marker.header.frame_id = self.config["base_name"]
+        marker.ns = "lead"
+        marker.id = 1
+        self.clear_ids.add((marker.ns, marker.id))
+        marker.type = visualization_msgs.msg.Marker.CUBE_LIST
+        marker.action = visualization_msgs.msg.Marker.ADD
+        marker.scale.x = interval[0]
+        marker.scale.y = interval[1]
+        marker.scale.z = interval[2] if cells[0].dim > 2 else 0.1
+        marker.pose.orientation.w = 1.0
+        marker.color = std_msgs.msg.ColorRGBA(*rgba)
+        marker.lifetime = rospy.Duration.from_sec(0.0)
         for cell in cells:
-            c = (cell.ws.lb + cell.ws.ub) / 2.0
-            c = c[:cell.dim]
+            center = (cell.ws.lb + cell.ws.ub) / 2.0
             if cell.dim == 2:
-                c = (*c, 0)
-            msg.points.append(geometry_msgs.msg.Point(*c))
-        msg_array.markers.append(msg)
+                marker.points.append(geometry_msgs.msg.Point(center[0], center[1], 0.0))
+            else:
+                marker.points.append(geometry_msgs.msg.Point(*center[:3]))
+        msg_array.markers.append(marker)
 
-        msg = visualization_msgs.msg.Marker()
-        msg.header.frame_id = self.config['base_name']
-        msg.ns = ns + "_txt"
-        msg.lifetime = rospy.Duration.from_sec(0.0)
-        msg.scale.z = interval[0] / 3  # text size
-        msg.pose.orientation.w = 1.0
-        msg.action = msg.ADD
-        msg.color = std_msgs.msg.ColorRGBA(0.9, 0.7, 0.5, 0.0)
         for idx, cell in enumerate(cells):
-            msg.id = 2 + idx
-            self.clear_ids.append((ns, msg.id))
-            msg.type = msg.TEXT_VIEW_FACING
-            msg.text = f'{cell.rid}'
-            c = (cell.ws.lb + cell.ws.ub) / 2.0
-            msg.pose.position.x = c[0]
-            msg.pose.position.y = c[1]
-            msg.pose.position.z = 0.1 if cell.dim == 2 else c[2]
-            msg_array.markers.append(deepcopy(msg))
-        self.cells_pub.publish(msg_array)
-    """
-                        self.viz.publish_motion(self.decomp.fk, [s1, s2],
-                                            rgba=(1, 0.2, 0.2, 1) if not validity else (0.2, 1, 0.2, 1), dim=3)
-    """
+            label = visualization_msgs.msg.Marker()
+            label.header.frame_id = self.config["base_name"]
+            label.ns = "lead_txt"
+            label.id = 2 + idx
+            self.clear_ids.add((label.ns, label.id))
+            label.type = visualization_msgs.msg.Marker.TEXT_VIEW_FACING
+            label.action = visualization_msgs.msg.Marker.ADD
+            label.scale.z = interval[0] / 3
+            label.pose.orientation.w = 1.0
+            label.color = std_msgs.msg.ColorRGBA(0.9, 0.7, 0.5, 0.0)
+            center = (cell.ws.lb + cell.ws.ub) / 2.0
+            label.text = "{0}".format(cell.rid)
+            label.pose.position.x = center[0]
+            label.pose.position.y = center[1]
+            label.pose.position.z = 0.1 if cell.dim == 2 else center[2]
+            msg_array.markers.append(label)
 
-    def publish_motion(self, fk: Callable[[State], State], states: List[State], rgba: Tuple, dim=2, lw=0.0025):
-        assert len(states) > 1
-        ns = "path"
+        self.cells_pub.publish(msg_array)
+
+    def publish_motion(
+        self,
+        fk: Callable[[State], State],
+        states: List[State],
+        rgba: Tuple[float, float, float, float],
+        dim: int = 2,
+        lw: float = 0.0025,
+    ) -> None:
+        if len(states) < 2:
+            raise ValueError("publish_motion requires at least two states.")
+
         msg_array = visualization_msgs.msg.MarkerArray()
-        msg = visualization_msgs.msg.Marker()
-        msg.header.frame_id = self.config['base_name']
-        msg.ns = ns
-        msg.id = self._gen_marker_id()
-        self.clear_ids.append((ns, msg.id))
-        msg.type = msg.LINE_STRIP
-        msg.action = msg.ADD
-        msg.scale.x = lw  # line width
-        msg.pose.orientation.w = 1.0
+        marker = visualization_msgs.msg.Marker()
+        marker.header.frame_id = self.config["base_name"]
+        marker.ns = "path"
+        marker.id = self._gen_marker_id()
+        self.clear_ids.add((marker.ns, marker.id))
+        marker.type = visualization_msgs.msg.Marker.LINE_STRIP
+        marker.action = visualization_msgs.msg.Marker.ADD
+        marker.scale.x = lw
+        marker.pose.orientation.w = 1.0
+        marker.color = std_msgs.msg.ColorRGBA(*rgba)
+
         resolution = 0.01
-        for i in range(1, len(states)):
-            s1 = states[i - 1]
-            s2 = states[i]
-            num = int(np.ceil(np.linalg.norm(s1.data_view - s2.data_view) / resolution))
-            for j in range(num):
-                ws_s = fk(s1.expand(s2, j / num))
+        for index in range(1, len(states)):
+            start = states[index - 1]
+            end = states[index]
+            num = max(1, int(np.ceil(np.linalg.norm(start.data_view - end.data_view) / resolution)))
+            for step in range(num + 1):
+                ws_state = fk(start.expand(end, step / float(num)))
                 if dim == 2:
-                    pt = (*ws_s.data_view[:2], 0.3)
+                    marker.points.append(geometry_msgs.msg.Point(ws_state[0], ws_state[1], 0.3))
                 else:
-                    pt = ws_s.data_view[:3]
-                msg.points.append(geometry_msgs.msg.Point(*pt))
-        msg.color = std_msgs.msg.ColorRGBA(*rgba)
-        msg_array.markers.append(msg)
-        self.cells_pub.publish(msg_array)
-    
+                    marker.points.append(geometry_msgs.msg.Point(*ws_state.data_view[:3]))
 
-    def publish_state(self, s: State):
-        ns = "state"
+        msg_array.markers.append(marker)
+        self.cells_pub.publish(msg_array)
+
+    def publish_state(self, s: State) -> None:
         msg_array = visualization_msgs.msg.MarkerArray()
-        msg = visualization_msgs.msg.Marker()
-        msg.header.frame_id = self.config['base_name']
-        msg.ns = ns
-        msg.id = self._gen_marker_id()
-        self.clear_ids.append((ns, msg.id))
-        msg.type = msg.SPHERE
-        msg.action = msg.ADD
-        msg.scale.x = msg.scale.y = msg.scale.z = 0.02
-        msg.pose.position.x = s[0]
-        msg.pose.position.y = s[1]
-        msg.pose.position.z = s[2]
-        msg.pose.orientation.w = 1.0
-        msg.color = std_msgs.msg.ColorRGBA(0.55, 0.8, 1.0, 1.0)
-        msg_array.markers.append(msg)
+        marker = visualization_msgs.msg.Marker()
+        marker.header.frame_id = self.config["base_name"]
+        marker.ns = "state"
+        marker.id = self._gen_marker_id()
+        self.clear_ids.add((marker.ns, marker.id))
+        marker.type = visualization_msgs.msg.Marker.SPHERE
+        marker.action = visualization_msgs.msg.Marker.ADD
+        marker.scale.x = marker.scale.y = marker.scale.z = 0.02
+        marker.pose.position.x = s[0]
+        marker.pose.position.y = s[1]
+        marker.pose.position.z = s[2] if s.dim > 2 else 0.0
+        marker.pose.orientation.w = 1.0
+        marker.color = std_msgs.msg.ColorRGBA(0.55, 0.8, 1.0, 1.0)
+        msg_array.markers.append(marker)
         self.cells_pub.publish(msg_array)
 
 
-if __name__ == '__main__':
-    pass
-    # uu = UnionFindSet[State]()
-    # uu.union(1, 2)
+__all__ = [
+    "Cell",
+    "Decomposition",
+    "Magic",
+    "Ratio",
+    "STP",
+    "Space",
+    "State",
+    "StateSet",
+    "UnionFindSet",
+    "Viz",
+    "WeightedGMM",
+    "exp_map",
+    "is_in_current_scene",
+    "log_map",
+    "optimal_path",
+    "quaternion_multiply",
+    "sample_6d",
+    "sample_in_orien_gmm",
+    "sample_in_pos_gmm",
+    "sample_in_work_space_with_EM",
+    "sample_in_work_space_with_EM_and_potential",
+    "sample_with_weightGMM",
+    "sample_with_weight_gmm",
+    "weighted_quaternion_mean",
+    "wrap_to_pi",
+]
 
-    # s1 = State(1, 2, 3)
-    # s2 = s1.copy()
-    # print(s1 == s2)
-    # print(s.dim)
+
+if __name__ == "__main__":
+    pass

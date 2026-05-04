@@ -1,251 +1,362 @@
+"""Weighted Gaussian mixture training for orientation and position experience data."""
+
+from __future__ import annotations
+
+import argparse
 import pickle
+from pathlib import Path
+from typing import Optional, Sequence, Tuple
 
 import numpy as np
-from scipy.linalg import sqrtm
 from sklearn.cluster import KMeans
-import os
-import data_tools as tl
+
+try:
+    from . import data_tools as tl
+except ImportError:  # pragma: no cover - script execution fallback
+    import data_tools as tl
 
 
-os.environ['OMP_NUM_THREADS'] = '2'
-def weighted_quaternion_mean(q_list, weights, max_iter=20, eps=1e-6):
-    """计算加权平均四元数"""
-    q_ref = np.asarray(q_list[0], dtype=np.float64)  # 参考四元数，确保是 numpy 数组
-    q_ref /= np.linalg.norm(q_ref)  # 单位化
-
-    for _ in range(max_iter):
-        v_sum = np.zeros(3)
-        for q, w in zip(q_list, weights):
-            q = np.asarray(q, dtype=np.float64)  # 确保 q 是 numpy 数组
-            v = log_map(q, q_ref)  # 计算切空间向量
-            v_sum += w * v  # 加权求和
-        # print("v_sum:", v_sum)
-        delta_q = exp_map(v_sum, q_ref)
-        # print("delta_q:", delta_q)
-        # print("q_ref:", q_ref)
-        q_ref = quaternion_multiply(delta_q, q_ref)  # 更新参考四元数
-        q_ref /= np.linalg.norm(q_ref)  # 单位化，确保 q_ref 始终是单位四元数
-    return q_ref
+MODULE_DIR = Path(__file__).resolve().parent
+DEFAULT_DATA_DIR = MODULE_DIR / "data"
+DEFAULT_ORIENTATION_COMPONENTS = 1
+DEFAULT_POSITION_COMPONENTS = 3
+DEFAULT_REGULARIZATION = 1e-6
 
 
-def log_map(q, q_ref):
-    """四元数到切空间映射"""
+def quaternion_multiply(q1: Sequence[float], q2: Sequence[float]) -> np.ndarray:
+    """Multiply two quaternions using the Hamilton product convention."""
+    w1, x1, y1, z1 = np.asarray(q1, dtype=np.float64)
+    w2, x2, y2, z2 = np.asarray(q2, dtype=np.float64)
+    return np.array(
+        [
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        ],
+        dtype=np.float64,
+    )
+
+
+def log_map(q: Sequence[float], q_ref: Sequence[float]) -> np.ndarray:
+    """Project quaternion ``q`` onto the tangent space around ``q_ref``."""
     q = np.asarray(q, dtype=np.float64)
     q_ref = np.asarray(q_ref, dtype=np.float64)
+    q_ref /= np.linalg.norm(q_ref)
 
-    q_inv = np.array([q_ref[0], -q_ref[1], -q_ref[2], -q_ref[3]])  # 计算 q_ref 的共轭
-    q_diff = quaternion_multiply(q, q_inv)  # 计算 q * q_ref^(-1)
-
-    theta = np.arccos(np.clip(q_diff[0], -1, 1))  # 计算旋转角
+    q_inverse = np.array([q_ref[0], -q_ref[1], -q_ref[2], -q_ref[3]], dtype=np.float64)
+    q_delta = quaternion_multiply(q, q_inverse)
+    theta = np.arccos(np.clip(q_delta[0], -1.0, 1.0))
     if theta < 1e-6:
-        return np.zeros(3)  # 角度很小时返回零向量
+        return np.zeros(3, dtype=np.float64)
+    return (theta / np.sin(theta)) * q_delta[1:]
 
-    return (theta / np.sin(theta)) * q_diff[1:]  # 提取虚部
 
-
-def exp_map(v, q_ref):
-    """切空间到四元数逆映射"""
+def exp_map(v: Sequence[float], q_ref: Sequence[float]) -> np.ndarray:
+    """Map a tangent-space vector back onto the quaternion manifold."""
     v = np.asarray(v, dtype=np.float64)
     q_ref = np.asarray(q_ref, dtype=np.float64)
 
-    theta = np.linalg.norm(v)  # 旋转角度
+    theta = np.linalg.norm(v)
     if theta < 1e-6:
-        return q_ref.copy()  # 零向量时返回参考四元数
+        return q_ref.copy()
+    q_exp = np.concatenate([[np.cos(theta)], (np.sin(theta) / theta) * v])
+    result = quaternion_multiply(q_exp, q_ref)
+    return result / np.linalg.norm(result)
 
-    q_exp = np.concatenate([[np.cos(theta)], (np.sin(theta)/theta) * v])  # 指数映射
-    return quaternion_multiply(q_exp, q_ref)  # 确保返回四元数
+
+def weighted_quaternion_mean(
+    q_list: Sequence[Sequence[float]],
+    weights: Sequence[float],
+    max_iter: int = 20,
+    eps: float = 1e-6,
+) -> np.ndarray:
+    """Compute the weighted mean quaternion via iterative tangent-space updates."""
+    quaternions = np.asarray(q_list, dtype=np.float64)
+    sample_weights = np.asarray(weights, dtype=np.float64)
+    q_ref = quaternions[0].copy()
+    q_ref /= np.linalg.norm(q_ref)
+
+    for _ in range(max_iter):
+        tangent_sum = np.zeros(3, dtype=np.float64)
+        for quaternion, weight in zip(quaternions, sample_weights):
+            tangent_sum += weight * log_map(quaternion, q_ref)
+        if np.linalg.norm(tangent_sum) < eps:
+            break
+        q_ref = exp_map(tangent_sum, q_ref)
+        q_ref /= np.linalg.norm(q_ref)
+    return q_ref
 
 
+def _weighted_covariance(
+    values: np.ndarray,
+    mean: np.ndarray,
+    sample_weights: np.ndarray,
+    regularization: float,
+) -> np.ndarray:
+    centered = values - mean
+    denominator = sample_weights.sum()
+    if denominator <= 0.0:
+        return np.eye(values.shape[1], dtype=np.float64) * regularization
+    covariance = (sample_weights[:, None, None] * np.einsum("ni,nj->nij", centered, centered)).sum(axis=0)
+    covariance /= denominator
+    covariance += np.eye(values.shape[1], dtype=np.float64) * regularization
+    return covariance
 
-def quaternion_multiply(q1, q2):
-    """Hamilton 乘法，计算 q1 * q2"""
-    w1, x1, y1, z1 = q1
-    w2, x2, y2, z2 = q2
-    return np.array([
-        w1*w2 - x1*x2 - y1*y2 - z1*z2,  # 实部
-        w1*x2 + x1*w2 + y1*z2 - z1*y2,  # i
-        w1*y2 - x1*z2 + y1*w2 + z1*x2,  # j
-        w1*z2 + x1*y2 - y1*x2 + z1*w2   # k
-    ])
+
+def _gaussian_density(values: np.ndarray, mean: np.ndarray, covariance: np.ndarray) -> np.ndarray:
+    dimension = values.shape[1]
+    centered = values - mean
+    inverse = np.linalg.inv(covariance)
+    exponent = -0.5 * np.sum(centered @ inverse * centered, axis=1)
+    determinant = max(np.linalg.det(covariance), np.finfo(np.float64).eps)
+    normalizer = np.sqrt(((2.0 * np.pi) ** dimension) * determinant)
+    return np.exp(exponent) / normalizer
+
 
 class WeightedGMM:
-    def __init__(self, n_components, shared_cov=False, max_iter=200, tol=1e-4):
+    """A lightweight weighted Gaussian mixture model with optional shared covariance."""
+
+    def __init__(
+        self,
+        n_components: int,
+        shared_cov: bool = False,
+        max_iter: int = 200,
+        tol: float = 1e-4,
+        regularization: float = DEFAULT_REGULARIZATION,
+        random_state: Optional[int] = None,
+    ) -> None:
         self.K = n_components
         self.shared_cov = shared_cov
         self.max_iter = max_iter
         self.tol = tol
+        self.regularization = regularization
+        self.random_state = random_state
         self.q_ref = []
+        self.pi = None
+        self.mu = None
+        self.Sigma = None
 
-    def fit(self, V, weights):
-        """V: 切空间向量 (N x 3)
-           weights: 样本权重 (N,) """
-        N, d = V.shape
-        # 初始化参数
-        kmeans = KMeans(n_clusters=self.K, n_init=10).fit(V)
-        self.pi = np.bincount(kmeans.labels_, weights=weights) / np.sum(weights)
-        self.mu = kmeans.cluster_centers_
+    def fit(self, values: np.ndarray, weights: Sequence[float]) -> "WeightedGMM":
+        """Fit the mixture model to weighted data."""
+        samples = np.asarray(values, dtype=np.float64)
+        sample_weights = np.asarray(weights, dtype=np.float64)
+        if samples.ndim != 2:
+            raise ValueError("Training data must be a 2D array.")
+        if len(samples) != len(sample_weights):
+            raise ValueError("Training data and weights must have the same length.")
+        if len(samples) < self.K:
+            raise ValueError("Number of samples must be at least the number of mixture components.")
+
+        sample_weights = sample_weights / sample_weights.sum()
+        kmeans = KMeans(n_clusters=self.K, n_init=10, random_state=self.random_state).fit(samples)
+        labels = kmeans.labels_
+        self.mu = kmeans.cluster_centers_.astype(np.float64)
+        self.pi = np.bincount(labels, weights=sample_weights, minlength=self.K).astype(np.float64)
+        self.pi /= self.pi.sum()
+
+        global_covariance = _weighted_covariance(samples, np.average(samples, axis=0, weights=sample_weights), sample_weights, self.regularization)
         if self.shared_cov:
-            self.Sigma = np.cov(V.T, aweights=weights)
-            self.Sigma = np.stack([self.Sigma] * self.K, axis=0)
+            self.Sigma = np.repeat(global_covariance[None, :, :], self.K, axis=0)
         else:
-            self.Sigma = np.array([np.cov(V[kmeans.labels_ == k].T,
-                                          aweights=weights[kmeans.labels_ == k])
-                                   for k in range(self.K)])
+            covariances = []
+            for component_index in range(self.K):
+                component_mask = labels == component_index
+                component_values = samples[component_mask]
+                component_weights = sample_weights[component_mask]
+                if len(component_values) == 0:
+                    covariances.append(global_covariance.copy())
+                    continue
+                covariance = _weighted_covariance(
+                    component_values,
+                    self.mu[component_index],
+                    component_weights,
+                    self.regularization,
+                )
+                covariances.append(covariance)
+            self.Sigma = np.asarray(covariances, dtype=np.float64)
 
-        # EM迭代
-        prev_loglik = -np.inf
-        for it in range(self.max_iter):
-            # E-Step
-            gamma = self._e_step(V, weights)
-
-            # M-Step
-            self._m_step(V, weights, gamma)
-
-            # 计算对数似然
-            loglik = self._log_likelihood(V, weights)
-            if np.abs(loglik - prev_loglik) < self.tol:
+        previous_log_likelihood = -np.inf
+        for _ in range(self.max_iter):
+            gamma = self._e_step(samples, sample_weights)
+            self._m_step(samples, sample_weights, gamma, global_covariance)
+            log_likelihood = self._log_likelihood(samples, sample_weights)
+            if np.abs(log_likelihood - previous_log_likelihood) < self.tol:
                 break
-            prev_loglik = loglik
+            previous_log_likelihood = log_likelihood
+        return self
 
-    def _e_step(self, V, weights):
-        eps = 1e-8
-        gamma = np.zeros((len(V), self.K))
-        for k in range(self.K):
-            diff = V - self.mu[k]
-            cov = self.Sigma[k] + 1e-6 * np.eye(3)  # 正则化
-            inv_cov = np.linalg.inv(cov)
-            exp_term = -0.5 * np.sum(diff @ inv_cov * diff, axis=1)
-            det_cov = np.linalg.det(cov) + eps
-            gamma[:, k] = self.pi[k] * np.exp(exp_term) / np.sqrt(det_cov)
+    def _e_step(self, values: np.ndarray, sample_weights: np.ndarray) -> np.ndarray:
+        gamma = np.zeros((len(values), self.K), dtype=np.float64)
+        for component_index in range(self.K):
+            density = _gaussian_density(values, self.mu[component_index], self.Sigma[component_index])
+            gamma[:, component_index] = self.pi[component_index] * density
+        gamma *= sample_weights[:, None]
 
-            #gamma[:, k] = self.pi[k] * np.exp(exp_term) / np.sqrt(np.linalg.det(2 * np.pi * cov))
-        gamma *= weights[:, None]
+        denominator = gamma.sum(axis=1, keepdims=True)
+        denominator[denominator == 0.0] = np.finfo(np.float64).eps
+        return gamma / denominator
 
-        gamma_sum = gamma.sum(axis=1, keepdims=True) + eps
-        gamma /= gamma_sum
+    def _m_step(
+        self,
+        values: np.ndarray,
+        sample_weights: np.ndarray,
+        gamma: np.ndarray,
+        fallback_covariance: np.ndarray,
+    ) -> None:
+        effective_mass = gamma.sum(axis=0)
+        effective_mass[effective_mass == 0.0] = np.finfo(np.float64).eps
+        self.pi = effective_mass / effective_mass.sum()
 
-        #gamma /= gamma.sum(axis=1, keepdims=True)
-        return gamma
-
-    def _m_step(self, V, weights, gamma):
-        N_k = gamma.sum(axis=0)
-        eps = 1e-8
-        self.pi = (N_k + eps) / (N_k.sum() + eps)
-
-        #self.pi = N_k / N_k.sum()
-
-        for k in range(self.K):
-            self.mu[k] = np.sum(gamma[:, k][:, None] * weights[:, None] * V, axis=0) / (gamma[:, k] * weights).sum()
+        for component_index in range(self.K):
+            weighted_gamma = gamma[:, component_index] * sample_weights
+            denominator = weighted_gamma.sum()
+            if denominator <= 0.0:
+                continue
+            self.mu[component_index] = np.sum(weighted_gamma[:, None] * values, axis=0) / denominator
 
         if self.shared_cov:
-            cov = np.zeros((3, 3))
-            for k in range(self.K):
-                diff = V - self.mu[k]
-                cov += (gamma[:, k, None, None] * weights[:, None, None] *
-                        np.einsum('ni,nj->nij', diff, diff)).sum(axis=0)
-            self.Sigma = cov / N_k.sum()
-            self.Sigma = np.stack([self.Sigma] * self.K, axis=0)
-        else:
-            for k in range(self.K):
-                diff = V - self.mu[k]
-                self.Sigma[k] = (gamma[:, k, None, None] * weights[:, None, None] *
-                                 np.einsum('ni,nj->nij', diff, diff)).sum(axis=0) / (N_k[k] + eps)
+            covariance = np.zeros_like(fallback_covariance)
+            for component_index in range(self.K):
+                weighted_gamma = gamma[:, component_index] * sample_weights
+                covariance += _weighted_covariance(
+                    values,
+                    self.mu[component_index],
+                    weighted_gamma,
+                    self.regularization,
+                )
+            covariance /= self.K
+            self.Sigma = np.repeat(covariance[None, :, :], self.K, axis=0)
+            return
 
-                # self.Sigma[k] = (gamma[:, k, None, None] * weights[:, None, None] *
-                #                  np.einsum('ni,nj->nij', diff, diff)).sum(axis=0) / N_k[k]
+        for component_index in range(self.K):
+            weighted_gamma = gamma[:, component_index] * sample_weights
+            if weighted_gamma.sum() <= 0.0:
+                self.Sigma[component_index] = fallback_covariance.copy()
+                continue
+            self.Sigma[component_index] = _weighted_covariance(
+                values,
+                self.mu[component_index],
+                weighted_gamma,
+                self.regularization,
+            )
 
-    def sample(self, n_samples):
-        k = np.random.choice(self.K, p=self.pi, size=n_samples)
-        samples = []
-        for ki in k:
-            v = np.random.multivariate_normal(self.mu[ki], self.Sigma[ki])
-            samples.append(v)
-        return np.array(samples)
+    def sample(self, n_samples: int) -> np.ndarray:
+        """Sample new observations from the fitted mixture."""
+        if self.pi is None or self.mu is None or self.Sigma is None:
+            raise RuntimeError("The model must be fitted before sampling.")
+        component_indices = np.random.choice(self.K, p=self.pi, size=n_samples)
+        samples = [
+            np.random.multivariate_normal(self.mu[component_index], self.Sigma[component_index])
+            for component_index in component_indices
+        ]
+        return np.asarray(samples, dtype=np.float64)
 
-    def _log_likelihood(self, V, weights):
-        """计算加权对数似然"""
-        loglik = 0
-        for k in range(self.K):
-            diff = V - self.mu[k]
-            cov = self.Sigma[k] + 1e-6 * np.eye(3)  # 加上小正则项避免数值问题
-            inv_cov = np.linalg.inv(cov)
-            exp_term = -0.5 * np.sum(diff @ inv_cov * diff, axis=1)
-        return loglik
-def get_gmm_model(data,weight,dim):
-    # 训练独立协方差GMM
-    gmm_indep = WeightedGMM(n_components=dim, shared_cov=False)
-    gmm_indep.fit(data, weight)
-    return gmm_indep
+    def _log_likelihood(self, values: np.ndarray, sample_weights: np.ndarray) -> float:
+        weighted_density = np.zeros(len(values), dtype=np.float64)
+        for component_index in range(self.K):
+            weighted_density += self.pi[component_index] * _gaussian_density(
+                values,
+                self.mu[component_index],
+                self.Sigma[component_index],
+            )
+        weighted_density = np.clip(weighted_density, np.finfo(np.float64).eps, None)
+        return float(np.sum(sample_weights * np.log(weighted_density)))
+
+
+def get_gmm_model(data: np.ndarray, weight: Sequence[float], dim: int) -> WeightedGMM:
+    """Compatibility wrapper that trains a weighted GMM with ``dim`` components."""
+    return WeightedGMM(n_components=dim, shared_cov=False).fit(data, weight)
+
+
+def _build_data_paths(experience_percent: int, data_root: Path) -> Tuple[Path, Path]:
+    joint_path = data_root / "sampling-data" / "joint" / "joint_{0}%.txt".format(experience_percent)
+    weight_path = data_root / "sampling-data" / "pos" / "pos_{0}%.txt".format(experience_percent)
+    return joint_path, weight_path
+
+
+def train_scene_models(
+    experience_percent: int,
+    orientation_components: int = DEFAULT_ORIENTATION_COMPONENTS,
+    position_components: int = DEFAULT_POSITION_COMPONENTS,
+    data_root: Path = DEFAULT_DATA_DIR,
+    output_root: Path = DEFAULT_DATA_DIR / "GMM_model",
+    gui: bool = False,
+) -> Tuple[WeightedGMM, WeightedGMM, np.ndarray]:
+    """Train and persist orientation and position GMMs for one experience ratio."""
+    joint_path, weight_path = _build_data_paths(experience_percent, data_root)
+    joint_samples = tl.data_read(str(joint_path))
+    quaternion_samples, position_samples = tl.data_process(joint_samples, gui=gui)
+    sample_weights = tl.read_weights(str(weight_path))
+
+    q_ref = weighted_quaternion_mean(quaternion_samples, sample_weights)
+    tangent_vectors = np.asarray([log_map(quaternion, q_ref) for quaternion in quaternion_samples], dtype=np.float64)
+
+    orientation_model = WeightedGMM(n_components=orientation_components, shared_cov=False).fit(
+        tangent_vectors,
+        sample_weights,
+    )
+    orientation_model.q_ref = q_ref
+    position_model = WeightedGMM(n_components=position_components, shared_cov=False).fit(
+        position_samples,
+        sample_weights,
+    )
+
+    orientation_output = output_root / "orien_model" / "gmm_{0}%_orien.pkl".format(experience_percent)
+    position_output = output_root / "pos_model" / "gmm_{0}%_pos.pkl".format(experience_percent)
+    orientation_output.parent.mkdir(parents=True, exist_ok=True)
+    position_output.parent.mkdir(parents=True, exist_ok=True)
+
+    with orientation_output.open("wb") as handle:
+        pickle.dump(orientation_model, handle)
+    with position_output.open("wb") as handle:
+        pickle.dump(position_model, handle)
+
+    orientation_samples = orientation_model.sample(100)
+    quaternion_predictions = np.asarray([exp_map(sample, q_ref) for sample in orientation_samples], dtype=np.float32)
+    evaluation_scores = tl.evaluate_sample_data(quaternion_predictions)
+    return orientation_model, position_model, evaluation_scores
+
+
+def main(argv: Optional[Sequence[str]] = None) -> None:
+    """Train one or more GMM checkpoints from the command line."""
+    parser = argparse.ArgumentParser(description="Train weighted scene GMM models.")
+    parser.add_argument(
+        "experience",
+        nargs="*",
+        type=int,
+        default=[30],
+        help="Experience percentages to train, for example: 20 30 40",
+    )
+    parser.add_argument("--gui", action="store_true", help="Use the PyBullet GUI while extracting features.")
+    args = parser.parse_args(argv)
+
+    for experience_percent in args.experience:
+        orientation_model, position_model, evaluation_scores = train_scene_models(
+            experience_percent=experience_percent,
+            gui=args.gui,
+        )
+        print(
+            "trained {0}% scene models: orientation={1}, position={2}, evaluation_mean={3:.4f}".format(
+                experience_percent,
+                orientation_model.K,
+                position_model.K,
+                float(np.mean(evaluation_scores)),
+            )
+        )
+
+
+__all__ = [
+    "WeightedGMM",
+    "exp_map",
+    "get_gmm_model",
+    "log_map",
+    "main",
+    "quaternion_multiply",
+    "train_scene_models",
+    "weighted_quaternion_mean",
+]
+
 
 if __name__ == "__main__":
-    # 生成带权重的示例数据
-    for i in range(3,4):
-        np.random.seed(0)
-        true_q_ref = np.array([1.0, 0, 0, 0])  # 假设真实参考四元数
-        q_list = []
-        file_path = "./data/sampling-data/joint/joint_{}0%.txt".format(i)
-        qlist = tl.data_read(file_path)
-        q_list, pos_list = tl.data_process(qlist)
-        print("q_list:", q_list)
-        #
-        # weights,angle = tl.getWeightsforData(qlist)  # 样本权重
-        # weights = np.random.rand(43)
-        weights = tl.read_weights("./data/sampling-data/pos/pos_{}0%.txt".format(i))
-
-        # for i in range(qlist.shape[0]):
-        #     print("orien:", q_list[i], "pos:", pos_list[i],"weight:", weights[i])
-        # for i in range(qlist.shape[0]):
-        #     print("orien:", q_list[i], "pos:", pos_list[i],"weight:", weights[i])
-        # 打印表头
-        # 打印表头
-        # header_orien = "Orien"
-        # header_pos = "Pos"
-        # header_weight = "Weight"
-        # print(f"{header_orien:<30} {header_pos:<40} {header_weight:<10}")
-        # print("-" * 80)
-
-        # 逐行打印数据，假设 q_list[i] 和 pos_list[i] 为一维数组
-        # for i in range(q_list.shape[0]):
-        #     orien_str = " ".join(f"{x:0.4f}" for x in q_list[i])
-        #     pos_str = " ".join(f"{x:0.4f}" for x in pos_list[i])
-        #     weight_str = f"{weights[i]:0.4f}"
-        #     print(f"{orien_str:<30} {pos_str:<40} {weight_str:<10}")
-        #
-        # print("q_list",q_list.shape)
-        q_list = np.array(q_list)
-
-        # print("q_list:", q_list)
-        # 计算加权平均四元数
-        q_ref = weighted_quaternion_mean(q_list, weights)
-
-        # print("True q_ref:", true_q_ref)
-        # # 映射到切空间
-        V = np.array([log_map(q, q_ref) for q in q_list])
-
-        print("V:", V.shape)
-        print("weights:", weights.shape)
-        # 训练独立协方差GMM
-        gmm_indep = WeightedGMM(n_components=1, shared_cov=False)
-        gmm_pos = WeightedGMM(n_components=3, shared_cov=False)
-        gmm_indep.fit(V, weights)
-        gmm_pos.fit(pos_list, weights)
-        gmm_indep.q_ref = q_ref
-        # # 训练共享协方差GMM
-        # gmm_shared = WeightedGMM(n_components=3, shared_cov=True)
-        # gmm_shared.fit(V, weights)
-
-        # 采样并逆映射
-        v_samples_indep = gmm_indep.sample(100)
-        q_samples_indep = [exp_map(v, q_ref) for v in v_samples_indep]
-        q_samples_indep = np.array(q_samples_indep, dtype=np.float32)
-        # print("q_samples_indep:", q_samples_indep)
-        results = tl.evaluate_sample_data(q_samples_indep)
-        # print("results:", results)
-        # 保存对象到文件
-        with open("data/GMM_model/orien_model/gmm_{}0%_orien.pkl".format(i), "wb") as f:
-            pickle.dump(gmm_indep, f)
-        with open("data/GMM_model/pos_model/gmm_{}0%_pos.pkl".format(i), "wb") as f:
-            pickle.dump(gmm_pos, f)
-        # # 从文件加载对象
-        # with open("saved_object.pkl", "rb") as f:
-        #     loaded_obj = pickle.load(f)
+    main()

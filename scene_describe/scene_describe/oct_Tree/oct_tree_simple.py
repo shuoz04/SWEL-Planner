@@ -1,312 +1,335 @@
-from typing import Tuple
+"""Octree utilities for scene similarity and potential-field generation."""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass, field
+from typing import Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from typing import Optional, Tuple
-import math
 
-from oct_Tree.scene_data import tools
-import oct_Tree.test as t
+try:
+    from .scene_data import tools as scene_tools
+except ImportError:  # pragma: no cover - script execution fallback
+    from oct_Tree.scene_data import tools as scene_tools
 
 
+DEFAULT_ENV_SIZE = 0.16
+DEFAULT_VOXEL_SIZE = 0.02
+DEFAULT_MAX_DEPTH = 4
+DEFAULT_SCENE_LOW = np.array([0.46, 0.0, 0.48], dtype=float)
+DEFAULT_SCENE_UP = np.array([0.7, 0.2, 0.68], dtype=float)
+DEFAULT_SCENE_CENTER = np.array([0.58, 0.08, 0.57], dtype=float)
+DEFAULT_DENSITY_WEIGHTS = (0.6, 0.4)
+DEFAULT_SIMILARITY_WEIGHTS = (0.5, 0.5)
+DEFAULT_FORCE_DISTANCE = 0.08
+DEFAULT_FORCE_EXPONENT = 2.0
+
+OCTANT_DIRECTIONS = {
+    0: np.array([1.0, 1.0, 1.0]),
+    1: np.array([-1.0, 1.0, 1.0]),
+    2: np.array([-1.0, -1.0, 1.0]),
+    3: np.array([1.0, -1.0, 1.0]),
+    4: np.array([1.0, 1.0, -1.0]),
+    5: np.array([-1.0, 1.0, -1.0]),
+    6: np.array([-1.0, -1.0, -1.0]),
+    7: np.array([1.0, -1.0, -1.0]),
+}
+DEPTH_WEIGHT_DENOMINATOR = sum(math.exp(1.0 + 1.0 / depth) for depth in range(2, DEFAULT_MAX_DEPTH + 1))
+
+
+@dataclass
 class ArtiPotentialPoint:
-    def __init__(self, attribute, depth, index_array):
-        self.depth = depth
-        self.attribute = attribute  # 势峰中心还是势阱中心
-        self.index_array = index_array
-        # attribute表示虚拟力朝向该势点还是背离该势点，0是背离，1是朝向
+    """Potential-field point generated from octree differences."""
+
+    attribute: int
+    depth: int
+    index_array: Sequence[int]
+    fi: float = DEFAULT_FORCE_DISTANCE
+    n: float = DEFAULT_FORCE_EXPONENT
+    center: np.ndarray = field(init=False)
+
+    def __post_init__(self) -> None:
+        if self.attribute not in (0, 1):
+            raise ValueError("Potential point attribute must be 0 (repulsive) or 1 (attractive).")
         self.center = compute_center_from_index(self.index_array)
-        self.fi = 0.08  # 计算虚拟力的距离阈值
-        self.n = 2  # 计算虚拟力的衰减指数
 
-    def get_force(self, points):
-        fi = self.fi
-        point = np.array(points)
-        direction = np.array(self.center) - point  # 现在方向指向center
-        dis = np.linalg.norm(direction)  # 三维欧式距离
-        if dis == 0:
-            return np.array([0, 0, 0], dtype=float)  # 势点所受的虚拟力
-        dir_n = direction / dis  # 归一后的单位方向向量
-        depth = self.depth
-        w = math.exp(1 + 1 / depth) / (math.exp(1 + 0.5) + math.exp(1 + 0.33) + math.exp(1 + 0.25))  # 层数决定的权重
-        if dis > fi:
-            return np.array([0, 0, 0], dtype=float)
-        F_abs_1 = w * math.pow(dis, 1 / self.n)  # 引力
-        F_abs_0 = w / math.pow(dis, self.n)  # 斥力
-        if self.attribute:
-            return F_abs_1 * dir_n
-        else:
-            return F_abs_0 * (-1) * dir_n
+    def get_force(self, point: Sequence[float]) -> np.ndarray:
+        """Compute the virtual force that this potential point applies to a query point."""
+        query_point = np.asarray(point, dtype=float)
+        direction = self.center - query_point
+        distance = np.linalg.norm(direction)
+        if distance == 0.0 or distance > self.fi:
+            return np.zeros(3, dtype=float)
+
+        direction /= distance
+        depth_weight = math.exp(1.0 + 1.0 / self.depth) / DEPTH_WEIGHT_DENOMINATOR
+        if self.attribute == 1:
+            magnitude = depth_weight * math.pow(distance, 1.0 / self.n)
+            return magnitude * direction
+
+        magnitude = depth_weight / math.pow(distance, self.n)
+        return -magnitude * direction
 
 
+@dataclass
 class OctreeNode:
-    def __init__(self, index, depth, parent = None):
-        self.size = float(0.16 / depth)  # 节点大小 (立方体的边长)第一层是root
-        self.children = [None] * 8  # 八个孩子节点
-        self.points = []  # 存储点的列表
-        self.depth = depth  # 当前节点的深度
-        self.parent = parent
-        self.index = index
-    def __str__(self):
-        return f"Node: {self.index} at depth {self.depth}"
-    def compute_p(self):
-        num_of_voelx = len(self.points)
-        p = (num_of_voelx * 0.02 * 0.02) / (self.size * self.size)
-        return p
+    """One node in the local scene octree."""
 
-    def compute_rou(self):
-        i = 0
-        rou_son = 0
-        if self.depth == 3:
-            for item in self.children:
-                if item:
-                    i += 1
-            return i / 8
-        for item in self.children:
-            if item:
-                i += 1
-                rou_son += item.compute_rou()
-        w1 = 0.6
-        w2 = 0.4
-        rou = w1 * i / 8 + w2 * rou_son / i
-        return rou
-    def show_tree(self):
+    index: int = -1
+    depth: int = 1
+    parent: Optional["OctreeNode"] = None
+    base_size: float = DEFAULT_ENV_SIZE
+    voxel_size: float = DEFAULT_VOXEL_SIZE
+    density_weights: Tuple[float, float] = DEFAULT_DENSITY_WEIGHTS
+    children: List[Optional["OctreeNode"]] = field(default_factory=lambda: [None] * 8)
+    points: List[np.ndarray] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.size = self.base_size / (2 ** (self.depth - 1))
+
+    def __str__(self) -> str:
+        return "Node(index={0}, depth={1})".format(self.index, self.depth)
+
+    def compute_p(self) -> float:
+        """Compute the occupancy ratio of this node using the stored point count."""
+        return (len(self.points) * self.voxel_size * self.voxel_size) / (self.size * self.size)
+
+    def compute_rou(self) -> float:
+        """Compute the recursive density term used by the original similarity metric."""
+        valid_children = [child for child in self.children if child is not None]
+        count = len(valid_children)
+        if self.depth == DEFAULT_MAX_DEPTH - 1:
+            return count / 8.0
+        if not valid_children:
+            return 0.0
+
+        child_density = sum(child.compute_rou() for child in valid_children)
+        weight_1, weight_2 = self.density_weights
+        return weight_1 * (count / 8.0) + weight_2 * (child_density / count)
+
+    def compute_occupancy_ratio(self) -> float:
+        """English alias for ``compute_p``."""
+        return self.compute_p()
+
+    def compute_density_ratio(self) -> float:
+        """English alias for ``compute_rou``."""
+        return self.compute_rou()
+
+    def show_tree(self) -> None:
+        """Print this node and all descendants."""
         print(self)
         for child in self.children:
-            if child:
+            if child is not None:
                 child.show_tree()
 
-def comput_index(parent, son):
-    point = son
-    parent = parent
-    relative_pos = np.array(point) - np.array(parent)
-    x = relative_pos[0]
-    y = relative_pos[1]
-    z = relative_pos[2]
-    if x > 0:
-        if y > 0:
-            if z > 0:
-                return 0
-            else:
-                return 4
-        else:
-            if z > 0:
-                return 3
-            else:
-                return 7
-    else:
-        if y > 0:
-            if z > 0:
-                return 1
-            else:
-                return 5
-        else:
-            if z > 0:
-                return 2
-            else:
-                return 6
+
+def compute_index(parent: Sequence[float], son: Sequence[float]) -> int:
+    """Return the octant index of ``son`` relative to ``parent``."""
+    relative = np.asarray(son, dtype=float) - np.asarray(parent, dtype=float)
+    x_positive, y_positive, z_positive = (relative > 0.0).astype(int)
+    return {
+        (1, 1, 1): 0,
+        (0, 1, 1): 1,
+        (0, 0, 1): 2,
+        (1, 0, 1): 3,
+        (1, 1, 0): 4,
+        (0, 1, 0): 5,
+        (0, 0, 0): 6,
+        (1, 0, 0): 7,
+    }[(x_positive, y_positive, z_positive)]
 
 
-def insert_node(root: OctreeNode, point):
-    index = compute_index_array(point)
-    root.points.append(point)
-    if root.children[index[0]]:
-        if root.children[index[0]].children[index[1]]:
-            if root.children[index[0]].children[index[1]].children[index[2]]:
-                root.children[index[0]].children[index[1]].children[index[2]].points.append(point)
-            else:
-                root.children[index[0]].children[index[1]].children[index[2]] = OctreeNode(index=index[2], depth=4,
-                                                                                           parent=root.children[
-                                                                                               index[0]].children[
-                                                                                               index[1]])
-                root.children[index[0]].children[index[1]].children[index[2]].points.append(point)
-        else:
-            root.children[index[0]].children[index[1]] = OctreeNode(index=index[1], depth=3,
-                                                                    parent=root.children[index[0]])
-    else:
-        root.children[index[0]] = OctreeNode(index=index[0], depth=2, parent=root)
-
-        root.children[index[0]].children[index[1]] = OctreeNode(index=index[1], depth=3, parent=root.children[index[0]])
-        root.children[index[0]].children[index[1]].children[index[2]] = OctreeNode(index=index[2], depth=4, parent=
-        root.children[index[0]].children[index[1]])
-    root.children[index[0]].points.append(point)
-    root.children[index[0]].children[index[1]].points.append(point)
+comput_index = compute_index
 
 
-def compute_index_array(point):
-    ##此处的point坐标是把中心点定位原点后的相对坐标
-    layer = {0: [1, 1, 1], 1: [-1, 1, 1], 2: [-1, -1, 1], 3: [1, -1, 1],
-             4: [1, 1, -1], 5: [-1, 1, -1], 6: [-1, -1, -1], 7: [1, -1, -1]}  ##第二层乘以4，第三层乘以2
-    index = []
-    index.append(comput_index([0, 0, 0], point))
-    center = 0.04 * np.array(layer[index[0]])
-    index.append(comput_index(center, point))
-    center = 0.02 * np.array(layer[index[1]]) + center
-    index.append(comput_index(center, point))
-    index = np.array(index)
-    return index
+def compute_index_array(
+    point: Sequence[float],
+    total_size: float = DEFAULT_ENV_SIZE,
+    min_size: float = DEFAULT_VOXEL_SIZE,
+    origin: Optional[Sequence[float]] = None,
+) -> np.ndarray:
+    """Compute the hierarchical octant path for one point."""
+    point_array = np.asarray(point, dtype=float)
+    center = np.zeros(3, dtype=float) if origin is None else np.asarray(origin, dtype=float)
+    layer_count = int(np.log2(total_size / min_size))
+    indices = []
+
+    for layer in range(layer_count):
+        index = compute_index(center, point_array)
+        indices.append(index)
+        center = center + OCTANT_DIRECTIONS[index] * total_size / (2 ** (layer + 2))
+    return np.asarray(indices, dtype=int)
 
 
-def compute_layer_sim(node_empir: OctreeNode, node_current: OctreeNode):
-    sim = 0
-    nodes_empir = node_empir.children
-    nodes_current = node_current.children
+def insert_node(root: OctreeNode, point: Sequence[float], max_depth: int = DEFAULT_MAX_DEPTH - 1) -> None:
+    """Insert one point into the octree up to ``max_depth`` levels below the root."""
+    if root is None:
+        raise ValueError("Root node cannot be None.")
+
+    point_array = np.asarray(point, dtype=float)
+    path = compute_index_array(point_array, total_size=root.base_size, min_size=root.voxel_size)
+    current = root
+    current.points.append(point_array)
+
+    for depth_index, child_index in enumerate(path[:max_depth], start=2):
+        if current.children[child_index] is None:
+            current.children[child_index] = OctreeNode(
+                index=child_index,
+                depth=depth_index,
+                parent=current,
+                base_size=root.base_size,
+                voxel_size=root.voxel_size,
+                density_weights=root.density_weights,
+            )
+        current = current.children[child_index]
+        current.points.append(point_array)
+
+
+def compute_layer_similarity(
+    node_empir: OctreeNode,
+    node_current: OctreeNode,
+    weights: Tuple[float, float] = DEFAULT_SIMILARITY_WEIGHTS,
+) -> float:
+    """Recursively compute the original octree similarity metric for one layer."""
     depth = node_current.depth
-    if depth == 4:
-        return 1
-    num = 8
-    for i in range(8):
-        if nodes_empir[i] and nodes_current[i]:
-            sim += compute_layer_sim(nodes_empir[i], nodes_current[i])
-        if not nodes_current[i] and not nodes_empir[i]:
-            sim += 1
-        if (not nodes_current[i] and nodes_empir[i]) or (nodes_current[i] and not nodes_empir[i]):
-            if depth == 3:
-                tep_sim = 0
-            else:
-                if nodes_current[i]:
-                    p_current = nodes_current[i].compute_p()
-                    rou = nodes_current[i].compute_rou()
-                else:
-                    p_current = 0
-                if nodes_empir[i]:
-                    p_empir = nodes_empir[i].compute_p()
-                    rou = nodes_empir[i].compute_rou()
-                else:
-                    p_empir = 0
-                delta = abs(p_current - p_empir)
+    if depth == DEFAULT_MAX_DEPTH:
+        return 1.0
 
-                w1 = 0.5
-                w2 = 0.5
-                tep_sim = w1 * delta + w2 * rou
-                if depth == 3: tep_sim = 0
-            sim += tep_sim
-    return sim / 8
+    similarity = 0.0
+    weight_1, weight_2 = weights
+    for child_index in range(8):
+        empirical_child = node_empir.children[child_index]
+        current_child = node_current.children[child_index]
+        if empirical_child is not None and current_child is not None:
+            similarity += compute_layer_similarity(empirical_child, current_child, weights=weights)
+            continue
+        if empirical_child is None and current_child is None:
+            similarity += 1.0
+            continue
+
+        if depth == DEFAULT_MAX_DEPTH - 1:
+            similarity += 0.0
+            continue
+
+        occupancy_current = current_child.compute_p() if current_child is not None else 0.0
+        occupancy_empirical = empirical_child.compute_p() if empirical_child is not None else 0.0
+        density = current_child.compute_rou() if current_child is not None else empirical_child.compute_rou()
+        similarity += weight_1 * abs(occupancy_current - occupancy_empirical) + weight_2 * density
+
+    return similarity / 8.0
 
 
-def compute_sim(root1: OctreeNode, root2: OctreeNode):
-    node_1 = root1
-    node_2 = root2
-    return compute_layer_sim(node_1, node_2)
+def compute_layer_sim(node_empir: OctreeNode, node_current: OctreeNode) -> float:
+    """Compatibility wrapper for the original function name."""
+    return compute_layer_similarity(node_empir, node_current)
 
 
-def compute_potential(root_history: OctreeNode, root_current: OctreeNode):  # 返回一个势点列表
+def compute_similarity(root1: OctreeNode, root2: OctreeNode) -> float:
+    """Compute the similarity score between two octree roots."""
+    return compute_layer_similarity(root1, root2)
+
+
+def compute_sim(root1: OctreeNode, root2: OctreeNode) -> float:
+    """Compatibility wrapper for the original function name."""
+    return compute_similarity(root1, root2)
+
+
+def _build_index_array(node: OctreeNode, child_index: int) -> List[int]:
+    indices = [child_index]
+    current = node
+    while current.parent is not None:
+        if current.parent.depth != 1:
+            indices.append(current.parent.index)
+        current = current.parent
+    indices.reverse()
+    return indices
+
+
+def compute_potential(root_history: OctreeNode, root_current: OctreeNode) -> List[ArtiPotentialPoint]:
+    """Generate attractive and repulsive potential points by comparing two octrees."""
     potential_points = []
-    node_empir = root_history
-    node_current = root_current
-    nodes_empir = node_empir.children
-    nodes_current = node_current.children
-    depth = node_current.depth
-    if depth == 4:
+    if root_current.depth == DEFAULT_MAX_DEPTH:
         return potential_points
 
-    for i in range(8):
-        if not nodes_current[i] and nodes_empir[i]:  # 当前场景该节点没有障碍物，历史经验节点有
-            # 应该指向该节点，即1
-            temp = nodes_empir[i]
-            dep = temp.depth
-            index_array = []
-            index_array.append(i)
-            while temp.parent:
-                if temp.parent.depth != 1:
-                    index_array.append(temp.parent.index)
-                temp = temp.parent
-            index_array.reverse()
-            potential_points.append(ArtiPotentialPoint(1, dep, index_array))
-        if nodes_current[i] and not nodes_empir[i]:  # 当前场景该节点有障碍物，历史经验节点没有
-            # 应该背离该节点，即0
-            temp = nodes_current[i]
-            dep = temp.depth
-            index_array = []
-            index_array.append(i)
-            while temp.parent:
-                if temp.parent.depth != 1:
-                    index_array.append(temp.parent.index)
-                temp = temp.parent
-            index_array.reverse()
-            potential_points.append(ArtiPotentialPoint(1, dep, index_array))
-        if nodes_empir[i] and nodes_current[i]:
-            potential_points.extend(compute_potential(nodes_empir[i], nodes_current[i]))
+    for child_index in range(8):
+        history_child = root_history.children[child_index]
+        current_child = root_current.children[child_index]
+
+        if history_child is not None and current_child is None:
+            potential_points.append(
+                ArtiPotentialPoint(
+                    attribute=1,
+                    depth=history_child.depth,
+                    index_array=_build_index_array(root_history, child_index),
+                )
+            )
+        elif current_child is not None and history_child is None:
+            potential_points.append(
+                ArtiPotentialPoint(
+                    attribute=0,
+                    depth=current_child.depth,
+                    index_array=_build_index_array(root_current, child_index),
+                )
+            )
+        elif history_child is not None and current_child is not None:
+            potential_points.extend(compute_potential(history_child, current_child))
 
     return potential_points
 
 
-def compute_center_from_index(index_array):
-    # 根据一个节点的索引序列来计算该节点中心位置
-    distance = 0.04
-    array = index_array
-    relative = np.array([0, 0, 0], dtype=float)
-    layer = {0: [1, 1, 1], 1: [-1, 1, 1], 2: [-1, -1, 1], 3: [1, -1, 1],
-             4: [1, 1, -1], 5: [-1, 1, -1], 6: [-1, -1, -1], 7: [1, -1, -1]}  # 第二层乘以4，第三层乘以2
-    for index in array:
-        relative += distance * np.array(layer[index])
-        distance = distance / 2
-    return relative
+def compute_center_from_index(index_array: Sequence[int]) -> np.ndarray:
+    """Compute the center position of an octree node from its index path."""
+    distance = DEFAULT_ENV_SIZE / 4.0
+    center = np.zeros(3, dtype=float)
+    for index in index_array:
+        center += distance * OCTANT_DIRECTIONS[index]
+        distance /= 2.0
+    return center
 
 
-def compute_total_force(potential_points, point):  # point是np数组,potential_points是由compute_potential()得到的势点列表
-    potential_center = potential_points
-    force = np.array([0, 0, 0], dtype=float)
-    for item in potential_center:
-        force += item.get_force(point)
-    return force
+def compute_total_force(potential_points: Iterable[ArtiPotentialPoint], point: Sequence[float]) -> np.ndarray:
+    """Sum all potential-field forces applied to one query point."""
+    total_force = np.zeros(3, dtype=float)
+    for potential_point in potential_points:
+        total_force += potential_point.get_force(point)
+    return total_force
 
 
-if __name__ == "__main__":
-    print(compute_index_array([0.02, -0.07, 0.09]))
-    print(compute_index_array([0.15, -0.04, -0.06]))
-    print(compute_index_array([-0.01, -0.1, 0.09]))
-    print(compute_index_array([-0.12, 0.14, -0.02]))
-    excel_path = './scene_data/data_of_scene1.xlsx'
-    points = tools.read_3d_data(excel_path)
-    low = [0.46, 0, 0.48]
-    up = [0.7, 0.2, 0.68]
-    center = np.array([0.58, 0.08, 0.57])
-    scene_1 = tools.filter_scene_data(points=points, bound_low=low, bound_up=up, center=center)
-    # 生成八叉树
-    root_emp = OctreeNode(0, depth=1, parent=None)
-    for item in scene_1:
-        insert_node(root_emp, item)
-    # 至此得到了示例八叉树root_emp
-    print("-----------------------------------------------------------------------------------------------------------")
-    root_emp.show_tree()
-    print("-----------------------------------------------------------------------------------------------------------")
-    file_path = f"scene_data/data_of_scene/data_of_scene{45}.txt"
-    root_current = t.generate_octree_from_txt(file_path)
+def generate_octree_from_points(points: np.ndarray) -> OctreeNode:
+    """Create an octree from already-centered scene points."""
+    root = OctreeNode(index=0, depth=1, parent=None)
+    for point in np.asarray(points, dtype=float):
+        insert_node(root, point)
+    return root
 
-    sim = compute_sim(root_emp, root_current)
-    # sim2 = compute_layer_similarity(root_emp, root_current)
-    print("sim = :", sim)
-    # print("sim2 = :", sim2)
-    poential = compute_potential(root_history=root_emp, root_current=root_current)
-    print(len(poential))
-    for item in poential:
-        print(item.index_array,'[', item.center[0], ',', item.center[1], ',', item.center[2], '],')
-    print(compute_total_force(poential, np.array([0.53115991, 0.09719978, 0.53595373], dtype=float) - center))
-    print(compute_total_force(poential, np.array([0.56462763, 0.12902873, 0.57918368], dtype=float) - center))
-    print(compute_total_force(poential, np.array([0.52360095, 0.02124487, 0.52451799], dtype=float) - center))
-    for item in root_current.points:
-        print(item[0] + center[0], ' ', item[1] + center[1], ' ', item[2] + center[2])
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    for item in root_current.points:
-        print(item[0] + center[0], ' ', item[1] + center[1], ' ', item[2] + center[2])
 
-    """
-    max_value = np.max(np.array(sims))
-    max_index = np.argmax(np.array(sims))
-    print("最大相似度:", max_value)
-    print("最相似场景下标:", max_index)
-    points_sim = roots[43].points
-    for item in points_sim:
-        item = np.array(item) + center
-        print(item[0], ' ', item[1], ' ', item[2])
+def generate_octree_from_txt(
+    path: str,
+    bound_low: Sequence[float] = DEFAULT_SCENE_LOW,
+    bound_up: Sequence[float] = DEFAULT_SCENE_UP,
+    center: Sequence[float] = DEFAULT_SCENE_CENTER,
+) -> OctreeNode:
+    """Load a legacy text scene file, crop it, center it, and build the octree."""
+    points = scene_tools.read_scene_data_in_txt(path)
+    filtered_points = scene_tools.filter_scene_data(points=points, bound_low=bound_low, bound_up=bound_up, center=center)
+    return generate_octree_from_points(filtered_points)
 
-    # 打印某个场景的点坐标，帮助在rviz复现
-    points_sim = roots[231].points
-    for item in points_sim:
-        item = np.array(item) + center
-        print(item[0], ' ', item[1], ' ', item[2])
-    """
 
+__all__ = [
+    "ArtiPotentialPoint",
+    "OctreeNode",
+    "compute_center_from_index",
+    "compute_index",
+    "compute_index_array",
+    "compute_layer_sim",
+    "compute_layer_similarity",
+    "compute_potential",
+    "compute_sim",
+    "compute_similarity",
+    "compute_total_force",
+    "comput_index",
+    "generate_octree_from_points",
+    "generate_octree_from_txt",
+    "insert_node",
+]

@@ -1,83 +1,67 @@
+"""Batch evaluation helpers for the legacy octree scene similarity experiments."""
 
-from scene_data import tools
-import oct_tree_simple as oct
+from __future__ import annotations
+
+from typing import Dict, List
+
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+try:
+    from . import oct_tree_simple as octree
+    from .scene_data import tools as scene_tools
+except ImportError:  # pragma: no cover - script execution fallback
+    import oct_tree_simple as octree
+    from scene_data import tools as scene_tools
 
 
-def generate_octree_from_txt(path):
-    # 从一个txt文档里面读取点，然后过滤到指定栅格，然后计算相对坐标，最好生成八叉树，返回根节点
-    points = tools.read_scene_data_in_txt(path)
-    low = [0.46, 0, 0.48]
-    up = [0.7, 0.2, 0.68]
-    center = np.array([0.58, 0.08, 0.57])
-    scene = tools.filter_scene_data(points=points, bound_low=low, bound_up=up, center=center)
-    root = oct.OctreeNode(0, depth=1, parent=None)
-    for item in scene:
-        oct.insert_node(root, item)
-    return root
+DEFAULT_BASELINE_EXCEL = "./scene_data/data_of_scene1.xlsx"
+DEFAULT_SCENE_TEMPLATE = "scene_data/data_of_scene/data_of_scene{0}.txt"
 
 
-if __name__ == '__main__':
-    # 得到示例数据的八叉树根节点
-    excel_path = './scene_data/data_of_scene1.xlsx'
-    points = tools.read_3d_data(excel_path)
-    low = [0.46, 0, 0.48]
-    up = [0.7, 0.2, 0.68]
-    center = np.array([0.58, 0.08, 0.57])
-    scene_1 = tools.filter_scene_data(points=points, bound_low=low, bound_up=up, center=center)
-    # 生成八叉树
-    root_emp = oct.OctreeNode(0, depth=1, parent=None)
-    for item in scene_1:
-        oct.insert_node(root_emp, item)
-    # 下面得到其他txt中的测试八叉树数据
-    roots = []  # 存储根节点
-    num_of_scene = 1000  # 场景数据数量
-    sims = []  # 存储所有相似度
-    num_of_strong = 0
-    num_of_mid = 0
-    for i in range(1000):
-        file_path = f"scene_data/data_of_scene/data_of_scene{i}.txt"
-        roots.append(generate_octree_from_txt(file_path))
-    for item in roots:
-        sims.append(oct.compute_sim(root_emp, item))
-    for i in range(num_of_scene):
-        if sims[i] > 0.7:
-            num_of_strong += 1
-            print(i,sims[i])
-        if (sims[i] < 0.7) and (sims[i] > 0.5):
-            num_of_mid += 1
-    print("强相似占比：", num_of_strong / num_of_scene)
-    print("若相似占比：", num_of_mid / num_of_scene)
-    num_of_strong = 0
-    num_of_mid = 0
-    sim_max = 0
-    sims = np.array(sims)
-    for i in range(10):
-        for j in range(100*i,100*i + 100):
-            if oct.compute_sim(root_emp, roots[j]) > 0.8:
-                if oct.compute_sim(root_emp, roots[j]) > sim_max:
-                    sim_max = oct.compute_sim(root_emp, roots[j])
-                num_of_strong += 1
-            if oct.compute_sim(root_emp, roots[j]) > 0.5 and oct.compute_sim(root_emp, roots[j])<0.8:
-                num_of_mid += 1
-        print("{}到{}：".format(0,100*i +100),num_of_strong / (100*i +100)," ",num_of_mid / (100*i+100),"最大相似度：",sim_max)
-    print("------------------------------------------------------------------------------")
-    print(sims)
-    """
-    max_value = np.max(np.array(sims))
-    max_index = np.argmax(np.array(sims)
-    print("最大相似度:", max_value)
-    print("最相似场景下标:", max_index)
-    points_sim = roots[43].points
-    for item in points_sim:
-        item = np.array(item) + center
-        print(item[0], ' ', item[1], ' ', item[2])
+def generate_octree_from_txt(path: str) -> octree.OctreeNode:
+    """Compatibility wrapper that builds an octree from one legacy scene text file."""
+    return octree.generate_octree_from_txt(path)
 
-    # 打印某个场景的点坐标，帮助在rviz复现
-    points_sim = roots[231].points
-    for item in points_sim:
-        item = np.array(item) + center
-        print(item[0], ' ', item[1], ' ', item[2])
-    """
+
+def build_baseline_octree(excel_path: str = DEFAULT_BASELINE_EXCEL) -> octree.OctreeNode:
+    """Build the empirical reference octree from the baseline Excel scene."""
+    points = scene_tools.read_3d_data(excel_path)
+    filtered = scene_tools.filter_scene_data(
+        points=points,
+        bound_low=octree.DEFAULT_SCENE_LOW,
+        bound_up=octree.DEFAULT_SCENE_UP,
+        center=octree.DEFAULT_SCENE_CENTER,
+    )
+    return octree.generate_octree_from_points(filtered)
+
+
+def evaluate_scene_similarity(root_empirical: octree.OctreeNode, scene_count: int = 1000) -> np.ndarray:
+    """Compute similarity scores for a batch of legacy scene files."""
+    roots = [generate_octree_from_txt(DEFAULT_SCENE_TEMPLATE.format(index)) for index in range(scene_count)]
+    return np.asarray([octree.compute_similarity(root_empirical, root) for root in roots], dtype=float)
+
+
+def summarize_similarity_bins(similarities: np.ndarray) -> Dict[str, float]:
+    """Return coarse similarity ratios for the historic strong and middle bins."""
+    total = max(len(similarities), 1)
+    strong_ratio = float(np.sum(similarities > 0.7)) / total
+    middle_ratio = float(np.sum((similarities > 0.5) & (similarities <= 0.7))) / total
+    return {
+        "strong_ratio": strong_ratio,
+        "middle_ratio": middle_ratio,
+        "max_similarity": float(np.max(similarities)) if len(similarities) else 0.0,
+    }
+
+
+def main() -> None:
+    """Run the legacy octree batch similarity evaluation."""
+    baseline_root = build_baseline_octree()
+    similarities = evaluate_scene_similarity(baseline_root)
+    summary = summarize_similarity_bins(similarities)
+    print("strong ratio:", summary["strong_ratio"])
+    print("middle ratio:", summary["middle_ratio"])
+    print("max similarity:", summary["max_similarity"])
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,15 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# IDE configs
+.idea/
+.vscode/
+
+# CMake / ROS build outputs
+build/
+devel/
+install/
+log/
+cmake-build-*/
